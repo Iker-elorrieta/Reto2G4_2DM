@@ -1,4 +1,4 @@
-package Principal;
+package Vista;
 
 import java.awt.Image;
 import java.io.DataInputStream;
@@ -15,28 +15,23 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import Controlador.Controlador;
 
 public class MiHorario extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
 
-
-    private DataInputStream dis;
-    private DataOutputStream dos;
-
     private JTable table;
     private DefaultTableModel modelo;
+    
+    Controlador controlador = new Controlador(this);
 
     public MiHorario(Socket cliente, DataInputStream dis, DataOutputStream dos, int id) {
-        this.dis = dis;
-        this.dos = dos;
+
         setTitle("Mi Horario");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 800, 534);
@@ -64,7 +59,7 @@ public class MiHorario extends JFrame {
         btnLogin.setContentAreaFilled(false);
         btnLogin.setBorderPainted(false);
         btnLogin.addActionListener(e -> {
-            Login login = new Login();
+            Login login = new Login(cliente, dis, dos);
             login.setVisible(true);
             try {
 				dos.writeUTF("0");
@@ -109,62 +104,20 @@ public class MiHorario extends JFrame {
         lblFondo.setIcon(new ImageIcon("fotos/backgroundGRANDE.png"));
         contentPane.add(lblFondo);
 
-        // CARGAR DATOS EN HILO SEPARADO
-        cargarDatos();
+        // CARGAR DATOS
+        ArrayList<Map<String, Object>> listaHorarios = controlador.cargarDatosHorario(dis, dos);
+        controlador.rellenarTabla(listaHorarios);
     }
 
-    private void cargarDatos() {
-        new Thread(() -> {
-            try {
-                dos.writeUTF("3");
-                dos.flush();
+	public DefaultTableModel getModelo() {
+		return modelo;
+	}
 
-                String json = dis.readUTF();
+	public void setModelo(DefaultTableModel modelo) {
+		this.modelo = modelo;
+	}
 
-                Gson gson = new Gson();
-                ArrayList<Map<String, Object>> listaHorarios = gson.fromJson(
-                        json,
-                        new TypeToken<ArrayList<Map<String, Object>>>(){}.getType()
-                );
-                
-
-                SwingUtilities.invokeLater(() -> {
-                    rellenarTabla(listaHorarios);
-                });
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
-    private void rellenarTabla(ArrayList<Map<String, Object>> lista) {
-    	
     
 
-        for (Map<String, Object> horario : lista) {
-
-        
-        	
-            String hora = (String.valueOf(horario.get("hora"))); // 1–6
-            String dia = (String) horario.get("dia");
-            String asignatura = (String) horario.get("modulos");
-
-            Double horaInt = Double.parseDouble(hora);
-            int fila = horaInt.intValue() - 1;
-            int columna = switch (dia.toLowerCase()) {
-                case "lunes" -> 1;
-                case "martes" -> 2;
-                case "miercoles" -> 3;
-                case "jueves" -> 4;
-                case "viernes" -> 5;
-                default -> -1;
-            };
-
-            if (columna != -1) {
-                modelo.setValueAt(asignatura, fila, columna);
-            }
-        }
-    }
+    
 }

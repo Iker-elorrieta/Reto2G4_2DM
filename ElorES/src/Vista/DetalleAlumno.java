@@ -1,4 +1,4 @@
-package Principal;
+package Vista;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -7,8 +7,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -17,8 +15,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+
+import Controlador.Controlador;
+
 import java.awt.Color;
 
 public class DetalleAlumno extends JFrame {
@@ -26,9 +25,6 @@ public class DetalleAlumno extends JFrame {
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
 
-    private DataInputStream dis;
-    private DataOutputStream dos;
-    private int idAlumno;
 
     private JLabel lblLogo;
     private JLabel lblFondo;
@@ -40,11 +36,11 @@ public class DetalleAlumno extends JFrame {
     private JLabel lblDNI;
     private JLabel lblDireccion;
     private JLabel lblTelefono;
+    
+    Controlador controlador = new Controlador(this);
 
     public DetalleAlumno(Socket cliente, DataInputStream dis, DataOutputStream dos, int idProfe, int idAlumno) {
-        this.dis = dis;
-        this.dos = dos;
-        this.idAlumno = idAlumno;
+  
         setTitle("DetalleAlumno");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 800, 534);
@@ -80,7 +76,7 @@ public class DetalleAlumno extends JFrame {
 		btnLogin.setContentAreaFilled(false);
         btnLogin.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        		Login login = new Login();
+        		Login login = new Login(cliente, dis, dos);
         		login.setVisible(true);   // MOSTRAR login
                 dispose();
         	}
@@ -130,10 +126,8 @@ public class DetalleAlumno extends JFrame {
         lblFondo.setIcon(new ImageIcon("fotos/backgroundGRANDE.png"));
         contentPane.add(lblFondo);
 
-        cargarDatos();
-        
-       
-        
+         
+        controlador.cargarDatosDetalleAlumno(dis, dos, idAlumno);
         
         btnVolver.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -149,50 +143,40 @@ public class DetalleAlumno extends JFrame {
 		});
     }
 
-    public void cargarDatos() {
-        try {
-            // Pedir lista de alumnos
-            dos.writeUTF("2");
-            dos.flush();
+	public JLabel getLblEmail() {
+		return lblEmail;
+	}
 
-            String json = dis.readUTF();
+	public JLabel getLblUsername() {
+		return lblUsername;
+	}
 
-            Gson gson = new Gson();
-            ArrayList<Map<String, Object>> listaAlumnos = gson.fromJson(
-                    json,
-                    new TypeToken<ArrayList<Map<String, Object>>>() {}.getType()
-            );
 
-            
-            Map<String, Object> alumnoEncontrado = null;
+	public JLabel getLblNombre() {
+		return lblNombre;
+	}
 
-            for (Map<String, Object> alumno : listaAlumnos) {
-                int idAlumno = ((Double) alumno.get("id")).intValue();
-                if (this.idAlumno == idAlumno) {
-                    alumnoEncontrado = alumno;
-                }
-            }
+	public JLabel getLblApellidos() {
+		return lblApellidos;
+	}
 
-            if (alumnoEncontrado != null) {
-                String email = alumnoEncontrado.get("email").toString();
-                String username = alumnoEncontrado.get("username").toString();
-                String nombre = alumnoEncontrado.get("nombre").toString();
-                String apellidos = alumnoEncontrado.get("apellidos").toString();
-                String dni = alumnoEncontrado.get("dni").toString();
-                String direccion = alumnoEncontrado.get("direccion").toString();
-                String telefono = alumnoEncontrado.get("telefono1").toString();
 
-                lblEmail.setText("Email: " + email);
-                lblUsername.setText("Username: " + username);
-                lblNombre.setText("Nombre: " + nombre);
-                lblApellidos.setText("Apellidos: " + apellidos);
-                lblDNI.setText("DNI: " + dni);
-                lblDireccion.setText("Dirección: " + direccion);
-                lblTelefono.setText("Teléfono: " + telefono);
-            }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	public JLabel getLblDNI() {
+		return lblDNI;
+	}
+
+
+	public JLabel getLblDireccion() {
+		return lblDireccion;
+	}
+
+
+	public JLabel getLblTelefono() {
+		return lblTelefono;
+	}
+
+
+
+
 }

@@ -1,4 +1,4 @@
-package Principal;
+package Vista;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -132,7 +132,7 @@ public class MenuProfe extends JFrame {
         btn6.setBorderPainted(false);
         btn6.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        		Login login = new Login();
+        		Login login = new Login(cliente, dis, dos);
         		login.setVisible(true);   // MOSTRAR login
         		try {
 					cliente.close();

@@ -1,4 +1,4 @@
-package Principal;
+package Vista;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -84,7 +84,7 @@ public class CrearReu extends JFrame {
 		btnLogin.setContentAreaFilled(false);
         btnLogin.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        		Login login = new Login();
+        		Login login = new Login(cliente, dis, dos);
         		login.setVisible(true);   // MOSTRAR login
                 dispose();
         	}
@@ -132,18 +132,18 @@ public class CrearReu extends JFrame {
         contentPane.add(txtNombre);
         txtNombre.setColumns(10);
         
-        JComboBox comboBoxMiembros = new JComboBox();
-        comboBoxMiembros.setModel(new DefaultComboBoxModel(new String[] {"", "Profesores", "Profesores Y Alumnos"}));
+        JComboBox<String> comboBoxMiembros = new JComboBox<String>();
+        comboBoxMiembros.setModel(new DefaultComboBoxModel<String>(new String[] {"", "Profesores", "Profesores Y Alumnos"}));
         comboBoxMiembros.setBounds(589, 189, 171, 30);
         contentPane.add(comboBoxMiembros);
         
-        JComboBox comboBoxEstado = new JComboBox();
-        comboBoxEstado.setModel(new DefaultComboBoxModel(new String[] {"", "Pendiente", "Conflicto", "Aceptada", "Cancelada"}));
+        JComboBox<String> comboBoxEstado = new JComboBox<String>();
+        comboBoxEstado.setModel(new DefaultComboBoxModel<String>(new String[] {"", "Pendiente", "Conflicto", "Aceptada", "Cancelada"}));
         comboBoxEstado.setBounds(589, 255, 171, 30);
         contentPane.add(comboBoxEstado);
         
-        JComboBox comboBoxUbi = new JComboBox();
-        comboBoxUbi.setModel(new DefaultComboBoxModel(new String[] {"Elorrieta-Errekamari LHII"}));
+        JComboBox<String> comboBoxUbi = new JComboBox<String>();
+        comboBoxUbi.setModel(new DefaultComboBoxModel<String>(new String[] {"Elorrieta-Errekamari LHII"}));
         comboBoxUbi.setBounds(589, 313, 171, 30);
         contentPane.add(comboBoxUbi);
         
@@ -151,8 +151,8 @@ public class CrearReu extends JFrame {
         textArea_Tema.setBounds(129, 376, 207, 93);
         contentPane.add(textArea_Tema);
         
-        JComboBox comboBoxMiembros_1 = new JComboBox();
-        comboBoxMiembros_1.setModel(new DefaultComboBoxModel(new String[] {"", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}));
+        JComboBox<String> comboBoxMiembros_1 = new JComboBox<String>();
+        comboBoxMiembros_1.setModel(new DefaultComboBoxModel<String>(new String[] {"", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}));
         comboBoxMiembros_1.setBounds(129, 302, 208, 30);
         contentPane.add(comboBoxMiembros_1);
         

@@ -1,4 +1,4 @@
-package Principal;
+package Vista;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -7,8 +7,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -17,16 +15,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+
+import Controlador.Controlador;
 
 public class MiPerfil extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private DataInputStream dis;
-	private DataOutputStream dos;
-	private int id;
+
 
 	// Labels a nivel de clase
 	private JLabel lblLogo;
@@ -39,11 +35,10 @@ public class MiPerfil extends JFrame {
 	private JLabel lblTelefono;
 	private JLabel lblFoto;
 	private JLabel lblFondo;
+	
+	Controlador controlador = new Controlador(this);
 
 	public MiPerfil(Socket cliente, DataInputStream dis, DataOutputStream dos, int id) {
-		this.dis = dis;
-		this.dos = dos;
-		this.id= id;
 
 		setTitle("Mi Perfil");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -94,7 +89,7 @@ public class MiPerfil extends JFrame {
 		
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Login login = new Login();
+				Login login = new Login(cliente, dis, dos);
 				try {
 					dos.writeUTF("0");
 				} catch (IOException e1) {
@@ -145,62 +140,95 @@ public class MiPerfil extends JFrame {
 		lblTelefono.setBounds(28, 290, 273, 14);
 		panel.add(lblTelefono);
 		
-		cargarDatos();
-		
-		
 		// Fondo
 		lblFondo = new JLabel("");
 		lblFondo.setBounds(0, 0, 800, 534);
 		lblFondo.setIcon(new ImageIcon("fotos/backgroundGRANDE.png"));
 		contentPane.add(lblFondo);
+		
+		controlador.cargarDatosPerfil(dis,dos, id);		
 	}
 
-	public void cargarDatos() {
-	    try {
-	        dos.writeUTF("1");
-	        dos.flush();
-
-	        String json = dis.readUTF();
-
-	        Gson gson = new Gson();
-	        ArrayList<Map<String, Object>> listaUsuarios = gson.fromJson(
-	        	    json,
-	        	    new TypeToken<ArrayList<Map<String, Object>>>(){}.getType()
-	        	);
-
-	        Map<String, Object> usuarioEncontrado = null;
-
-	        for (Map<String, Object> usuario : listaUsuarios) {
-	            double usuarioId = Double.parseDouble(String.valueOf(usuario.get("id")));
-	            if (usuarioId == this.id) {
-	                usuarioEncontrado = usuario;
-	            }
-	        }
-
-	        if (usuarioEncontrado != null) {
-	            String email = (String) usuarioEncontrado.get("email");
-	            String nombre = (String) usuarioEncontrado.get("nombre");
-	            String username = (String) usuarioEncontrado.get("username");
-	            String apellidos = (String) usuarioEncontrado.get("apellidos");
-	            String dni = (String) usuarioEncontrado.get("dni");
-	            String direccion = (String) usuarioEncontrado.get("direccion");
-	            String telefono = (String) usuarioEncontrado.get("telefono1");
-
-	            // Asignar datos a los labels
-	            lblEmail.setText("Email: " + email);
-	            lblNombre.setText("Nombre: " + nombre);
-	            lblUsername.setText("Username: " + username);
-	            lblApellidos.setText("Apellidos: " + apellidos);
-	            lblDNI.setText("DNI: " + dni);
-	            lblDireccion.setText("Dirección: " + direccion);
-	            lblTelefono.setText("Teléfono: " + telefono);
-
-	        } else {
-	            System.out.println("No se encontró un usuario con id: " + this.id);
-	        }
-
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
+	public JLabel getLblLogo() {
+		return lblLogo;
 	}
+
+	public void setLblLogo(JLabel lblLogo) {
+		this.lblLogo = lblLogo;
+	}
+
+	public JLabel getLblEmail() {
+		return lblEmail;
+	}
+
+	public void setLblEmail(JLabel lblEmail) {
+		this.lblEmail = lblEmail;
+	}
+
+	public JLabel getLblUsername() {
+		return lblUsername;
+	}
+
+	public void setLblUsername(JLabel lblUsername) {
+		this.lblUsername = lblUsername;
+	}
+
+	public JLabel getLblNombre() {
+		return lblNombre;
+	}
+
+	public void setLblNombre(JLabel lblNombre) {
+		this.lblNombre = lblNombre;
+	}
+
+	public JLabel getLblApellidos() {
+		return lblApellidos;
+	}
+
+	public void setLblApellidos(JLabel lblApellidos) {
+		this.lblApellidos = lblApellidos;
+	}
+
+	public JLabel getLblDNI() {
+		return lblDNI;
+	}
+
+	public void setLblDNI(JLabel lblDNI) {
+		this.lblDNI = lblDNI;
+	}
+
+	public JLabel getLblDireccion() {
+		return lblDireccion;
+	}
+
+	public void setLblDireccion(JLabel lblDireccion) {
+		this.lblDireccion = lblDireccion;
+	}
+
+	public JLabel getLblTelefono() {
+		return lblTelefono;
+	}
+
+	public void setLblTelefono(JLabel lblTelefono) {
+		this.lblTelefono = lblTelefono;
+	}
+
+	public JLabel getLblFoto() {
+		return lblFoto;
+	}
+
+	public void setLblFoto(JLabel lblFoto) {
+		this.lblFoto = lblFoto;
+	}
+
+	public JLabel getLblFondo() {
+		return lblFondo;
+	}
+
+	public void setLblFondo(JLabel lblFondo) {
+		this.lblFondo = lblFondo;
+	}
+
+	
+	
 }

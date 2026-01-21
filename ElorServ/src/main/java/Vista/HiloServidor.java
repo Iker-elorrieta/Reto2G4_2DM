@@ -80,10 +80,9 @@ public class HiloServidor extends Thread {
 	                }
 
 	                if (correcto) {
-	                    dos.writeUTF("Correcto");
                     	dos.writeUTF(idProfe);
 	                } else {
-	                    dos.writeUTF("Incorrecto");
+	                    dos.writeUTF("-1");
 	                }
 	                
 	            }

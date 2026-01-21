@@ -1,4 +1,4 @@
-package Principal;
+package Vista;
 
 import javax.swing.JButton;
 import java.awt.Color;

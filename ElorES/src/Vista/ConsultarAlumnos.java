@@ -1,4 +1,4 @@
-package Principal;
+package Vista;
 
 import java.awt.Image;
 import javax.swing.ImageIcon;
@@ -11,15 +11,15 @@ import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+
+
+import Controlador.Controlador;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Map;
+
 
 public class ConsultarAlumnos extends JFrame {
 
@@ -27,12 +27,10 @@ public class ConsultarAlumnos extends JFrame {
     private JPanel contentPane;
     private DefaultTableModel model;
 
-    private DataInputStream dis;
-    private DataOutputStream dos;
+    Controlador controlador = new Controlador();
 
     public ConsultarAlumnos(Socket cliente, DataInputStream dis, DataOutputStream dos, int idProfe) {
-        this.dis = dis;
-        this.dos = dos;
+
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 800, 534);
@@ -60,7 +58,7 @@ public class ConsultarAlumnos extends JFrame {
         btnLogin.setContentAreaFilled(false);
         btnLogin.setBorderPainted(false);
         btnLogin.addActionListener(e -> {
-            Login login = new Login();
+            Login login = new Login(cliente, dis, dos);
             login.setVisible(true);
             try {
                 cliente.close();
@@ -110,7 +108,7 @@ public class ConsultarAlumnos extends JFrame {
         table.getColumnModel().getColumn(0).setMaxWidth(0);
         table.getColumnModel().getColumn(0).setWidth(0);
 
-        cargarDatos();
+        model = controlador.cargarDatosAlumnos(dis, dos, model);
 
         // SELECCIÓN DE FILA
         table.getSelectionModel().addListSelectionListener(e -> {
@@ -131,34 +129,5 @@ public class ConsultarAlumnos extends JFrame {
         lblFondo.setBounds(0, 0, 800, 534);
         lblFondo.setIcon(new ImageIcon("fotos/backgroundGRANDE.png"));
         contentPane.add(lblFondo);
-    }
-
-    public void cargarDatos() {
-        try {
-            dos.writeUTF("2");
-            dos.flush();
-
-            String json = dis.readUTF();
-
-            Gson gson = new Gson();
-            ArrayList<Map<String, Object>> listaAlumnos = gson.fromJson(
-                    json,
-                    new TypeToken<ArrayList<Map<String, Object>>>() {}.getType()
-            );
-
-            model.setRowCount(0);
-
-            for (Map<String, Object> alumno : listaAlumnos) {
-            	int idAlumno = ((Double) alumno.get("id")).intValue();
-            	String dni = alumno.get("dni").toString();
-                String nombre = alumno.get("nombre").toString();
-                String apellidos = alumno.get("apellidos").toString();
-
-                model.addRow(new Object[]{idAlumno, dni, nombre, apellidos});
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }
