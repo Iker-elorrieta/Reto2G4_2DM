@@ -139,6 +139,20 @@ public class Consultas {
 	}
 
 
+	public ArrayList<Horarios> obtenerHorarios() {
+		ArrayList<Horarios> listaHorarios = new ArrayList<>();
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		
+		try {
+			 String hql = "from Horarios";
+			    Query<Horarios> query = session.createQuery(hql, Horarios.class);
+			    listaHorarios.addAll(query.list());
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return listaHorarios;
+	}
 
 
 

@@ -35,9 +35,13 @@ public class Controlador {
 	    ArrayList<Centro> centros = leerJson.getCentros();
 	    for (Centro c : centros) {
 	        if (c.getCCEN().equals(idCentro)) {
-	            return c.getNOM(); // ← ahora sí devuelve el nombre
+	            return c.getNOM(); 
 	        }
 	    }
 	    return null;
+	}
+	
+	public ArrayList<Horarios> obtenerHorarios() {
+		return gestor.obtenerHorarios();
 	}
 }

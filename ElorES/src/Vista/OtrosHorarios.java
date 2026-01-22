@@ -3,6 +3,7 @@ package Vista;
 import java.awt.Image;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 
 import Controlador.Controlador;
 
@@ -12,10 +13,14 @@ public class OtrosHorarios extends JFrame {
     private JPanel contentPane;
 
     private JComboBox<String> cbProfesores;
+    private JTable tabla;
+    private DefaultTableModel modelo;
 
+    private Controlador controlador;
 
     public OtrosHorarios(Controlador controlador, int idProfe) {
 
+        this.controlador = controlador;
         controlador.setOtrosHorarios(this);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -68,7 +73,28 @@ public class OtrosHorarios extends JFrame {
         cbProfesores.setBounds(10, 92, 171, 30);
         contentPane.add(cbProfesores);
 
+        // TABLA
+        String[] columnas = {"Hora", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
+        modelo = new DefaultTableModel(columnas, 6);
+
+        for (int i = 0; i < 6; i++) {
+            modelo.setValueAt("Hora " + (i + 1), i, 0);
+        }
+
+        tabla = new JTable(modelo);
+        JScrollPane scrollPane = new JScrollPane(tabla);
+        scrollPane.setBounds(200, 150, 550, 300);
+        contentPane.add(scrollPane);
+
+        // CARGAR PROFESORES
         controlador.otrosHorarios();
+
+        // CUANDO SELECCIONA UN PROFESOR → CARGAR SU HORARIO
+        cbProfesores.addActionListener(e -> {
+            String nombre = cbProfesores.getSelectedItem().toString();
+            controlador.cargarHorarioDeProfesor(nombre);
+        });
+
         // FONDO
         JLabel lblFondo = new JLabel("");
         lblFondo.setBounds(0, 0, 800, 534);
@@ -76,9 +102,6 @@ public class OtrosHorarios extends JFrame {
         contentPane.add(lblFondo);
     }
 
-    public JComboBox<String> getCbProfesores() {
-        return cbProfesores;
-    }
-    
-    
+    public JComboBox<String> getCbProfesores() { return cbProfesores; }
+    public DefaultTableModel getModelo() { return modelo; }
 }

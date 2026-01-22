@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.table.DefaultTableModel;
@@ -41,6 +42,7 @@ public class Controlador {
     private Socket cliente;
     private DataInputStream dis;
     private DataOutputStream dos;
+    private Map<String, Integer> mapaProfesores = new HashMap<>();
 
     // ---------------------------
     //  REFERENCIAS A VISTAS
@@ -206,14 +208,69 @@ public class Controlador {
             ArrayList<Map<String, Object>> lista =
                     gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
 
+            mapaProfesores.clear();
+            otrosHorarios.getCbProfesores().removeAllItems();
+
             for (Map<String, Object> h : lista) {
-                otrosHorarios.getCbProfesores().addItem(h.get(NOMBRE).toString());
+
+                String nombre = h.get(NOMBRE).toString();
+                int id = ((Double) h.get(ID)).intValue();
+
+                mapaProfesores.put(nombre, id);
+                otrosHorarios.getCbProfesores().addItem(nombre);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    public void cargarHorarioDeProfesor(String nombreProfe) {
+
+        int idProfe = mapaProfesores.get(nombreProfe);
+        DefaultTableModel model = otrosHorarios.getModelo();
+
+        try {
+            dos.writeUTF("5"); 
+            dos.writeInt(idProfe);
+            dos.flush();
+
+            String json = dis.readUTF();
+
+            Gson gson = new Gson();
+            ArrayList<Map<String, Object>> lista =
+                    gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
+
+            // limpiar tabla
+            for (int i = 0; i < 6; i++) {
+                for (int j = 1; j < 6; j++) {
+                    model.setValueAt("", i, j);
+                }
+            }
+
+            for (Map<String, Object> h : lista) {
+
+                int fila = ((Double) h.get(HORA)).intValue() - 1;
+
+                int col = switch (h.get(DIA).toString().toLowerCase()) {
+                    case "lunes" -> 1;
+                    case "martes" -> 2;
+                    case "miercoles" -> 3;
+                    case "jueves" -> 4;
+                    case "viernes" -> 5;
+                    default -> -1;
+                };
+
+                if (col != -1) {
+                    model.setValueAt(h.get(MODULOS), fila, col);
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     // ---------------------------
     //  ALUMNOS
