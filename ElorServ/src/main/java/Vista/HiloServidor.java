@@ -19,13 +19,10 @@ import modelo.Users;
 public class HiloServidor extends Thread {
 
     private Socket cliente;
-    private String userEmail;
-    private String userContraseña;
+
 
     public HiloServidor(Socket cliente, String userEmail, String userContraseña) {
         this.cliente = cliente;
-        this.userEmail = userEmail;
-        this.userContraseña = userContraseña;
     }
 
     public HiloServidor(Socket cliente) {
@@ -171,7 +168,7 @@ public class HiloServidor extends Thread {
 
                     case 5: {
 
-                        int idOtroProfe = dis.readInt();  // ← AHORA SÍ LEEMOS EL INT
+                        int idOtroProfe = dis.readInt(); 
 
                         ArrayList<Horarios> listaHorarioOtro =
                                 controlador.obtenerHorarioProfe(idOtroProfe);

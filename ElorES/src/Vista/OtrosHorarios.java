@@ -16,11 +16,9 @@ public class OtrosHorarios extends JFrame {
     private JTable tabla;
     private DefaultTableModel modelo;
 
-    private Controlador controlador;
 
     public OtrosHorarios(Controlador controlador, int idProfe) {
 
-        this.controlador = controlador;
         controlador.setOtrosHorarios(this);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
