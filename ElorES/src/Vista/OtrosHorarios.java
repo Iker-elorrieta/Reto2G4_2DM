@@ -68,9 +68,7 @@ public class OtrosHorarios extends JFrame {
         cbProfesores.setBounds(10, 92, 171, 30);
         contentPane.add(cbProfesores);
 
-        // Aquí podrías llamar a un método del controlador para cargar profesores
-        // controlador.cargarProfesoresEnCombo();
-
+        controlador.otrosHorarios();
         // FONDO
         JLabel lblFondo = new JLabel("");
         lblFondo.setBounds(0, 0, 800, 534);
@@ -81,4 +79,6 @@ public class OtrosHorarios extends JFrame {
     public JComboBox<String> getCbProfesores() {
         return cbProfesores;
     }
+    
+    
 }

@@ -17,6 +17,25 @@ import com.google.gson.reflect.TypeToken;
 public class Controlador {
 
     // ---------------------------
+    //  CONSTANTES JSON
+    // ---------------------------
+    private static final String ID = "id";
+    private static final String EMAIL = "email";
+    private static final String NOMBRE = "nombre";
+    private static final String USERNAME = "username";
+    private static final String APELLIDOS = "apellidos";
+    private static final String DNI = "dni";
+    private static final String DIRECCION = "direccion";
+    private static final String TELEFONO = "telefono1";
+    private static final String HORA = "hora";
+    private static final String DIA = "dia";
+    private static final String MODULOS = "modulos";
+    private static final String PROFESOR = "profesor";
+    private static final String ALUMNO = "alumno";
+    private static final String CENTRO = "centro";
+    private static final String ESTADO = "estado";
+
+    // ---------------------------
     //  CONEXIÓN ÚNICA
     // ---------------------------
     private Socket cliente;
@@ -31,6 +50,8 @@ public class Controlador {
     private Vista.DetalleAlumno detalleAlumno;
     private Vista.MiPerfil miPerfil;
     private Vista.MiHorario miHorario;
+    private Vista.OtrosHorarios otrosHorarios;
+
     // ---------------------------
     //  CONSTRUCTOR
     // ---------------------------
@@ -115,16 +136,16 @@ public class Controlador {
                     gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
 
             for (Map<String, Object> u : lista) {
-                int id = ((Double) u.get("id")).intValue();
+                int id = ((Double) u.get(ID)).intValue();
                 if (id == idProfe) {
 
-                    miPerfil.getLblEmail().setText("Email: " + u.get("email"));
-                    miPerfil.getLblNombre().setText("Nombre: " + u.get("nombre"));
-                    miPerfil.getLblUsername().setText("Username: " + u.get("username"));
-                    miPerfil.getLblApellidos().setText("Apellidos: " + u.get("apellidos"));
-                    miPerfil.getLblDNI().setText("DNI: " + u.get("dni"));
-                    miPerfil.getLblDireccion().setText("Dirección: " + u.get("direccion"));
-                    miPerfil.getLblTelefono().setText("Teléfono: " + u.get("telefono1"));
+                    miPerfil.getLblEmail().setText("Email: " + u.get(EMAIL));
+                    miPerfil.getLblNombre().setText("Nombre: " + u.get(NOMBRE));
+                    miPerfil.getLblUsername().setText("Username: " + u.get(USERNAME));
+                    miPerfil.getLblApellidos().setText("Apellidos: " + u.get(APELLIDOS));
+                    miPerfil.getLblDNI().setText("DNI: " + u.get(DNI));
+                    miPerfil.getLblDireccion().setText("Dirección: " + u.get(DIRECCION));
+                    miPerfil.getLblTelefono().setText("Teléfono: " + u.get(TELEFONO));
                 }
             }
 
@@ -150,9 +171,9 @@ public class Controlador {
 
             for (Map<String, Object> h : lista) {
 
-            	int fila = ((Double) h.get("hora")).intValue() - 1;
+                int fila = ((Double) h.get(HORA)).intValue() - 1;
 
-                int col = switch (h.get("dia").toString().toLowerCase()) {
+                int col = switch (h.get(DIA).toString().toLowerCase()) {
                     case "lunes" -> 1;
                     case "martes" -> 2;
                     case "miercoles" -> 3;
@@ -162,8 +183,31 @@ public class Controlador {
                 };
 
                 if (col != -1) {
-                    miHorario.getModelo().setValueAt(h.get("modulos"), fila, col);
+                    miHorario.getModelo().setValueAt(h.get(MODULOS), fila, col);
                 }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ---------------------------
+    //  OTROS HORARIOS
+    // ---------------------------
+    public void otrosHorarios() {
+        try {
+            dos.writeUTF("1");
+            dos.flush();
+
+            String json = dis.readUTF();
+
+            Gson gson = new Gson();
+            ArrayList<Map<String, Object>> lista =
+                    gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
+
+            for (Map<String, Object> h : lista) {
+                otrosHorarios.getCbProfesores().addItem(h.get(NOMBRE).toString());
             }
 
         } catch (IOException e) {
@@ -192,10 +236,10 @@ public class Controlador {
             for (Map<String, Object> a : lista) {
 
                 model.addRow(new Object[]{
-                        ((Double) a.get("id")).intValue(),
-                        a.get("dni"),
-                        a.get("nombre"),
-                        a.get("apellidos")
+                        ((Double) a.get(ID)).intValue(),
+                        a.get(DNI),
+                        a.get(NOMBRE),
+                        a.get(APELLIDOS)
                 });
             }
 
@@ -221,17 +265,17 @@ public class Controlador {
 
             for (Map<String, Object> a : lista) {
 
-                int id = ((Double) a.get("id")).intValue();
+                int id = ((Double) a.get(ID)).intValue();
 
                 if (id == idAlumno) {
 
-                    detalleAlumno.getLblEmail().setText("Email: " + a.get("email"));
-                    detalleAlumno.getLblNombre().setText("Nombre: " + a.get("nombre"));
-                    detalleAlumno.getLblUsername().setText("Username: " + a.get("username"));
-                    detalleAlumno.getLblApellidos().setText("Apellidos: " + a.get("apellidos"));
-                    detalleAlumno.getLblDNI().setText("DNI: " + a.get("dni"));
-                    detalleAlumno.getLblDireccion().setText("Dirección: " + a.get("direccion"));
-                    detalleAlumno.getLblTelefono().setText("Teléfono: " + a.get("telefono1"));
+                    detalleAlumno.getLblEmail().setText("Email: " + a.get(EMAIL));
+                    detalleAlumno.getLblNombre().setText("Nombre: " + a.get(NOMBRE));
+                    detalleAlumno.getLblUsername().setText("Username: " + a.get(USERNAME));
+                    detalleAlumno.getLblApellidos().setText("Apellidos: " + a.get(APELLIDOS));
+                    detalleAlumno.getLblDNI().setText("DNI: " + a.get(DNI));
+                    detalleAlumno.getLblDireccion().setText("Dirección: " + a.get(DIRECCION));
+                    detalleAlumno.getLblTelefono().setText("Teléfono: " + a.get(TELEFONO));
                 }
             }
 
@@ -260,10 +304,10 @@ public class Controlador {
             for (Map<String, Object> r : lista) {
 
                 model.addRow(new Object[]{
-                        r.get("profesor"),
-                        r.get("alumno"),
-                        r.get("centro"),
-                        r.get("estado")
+                        r.get(PROFESOR),
+                        r.get(ALUMNO),
+                        r.get(CENTRO),
+                        r.get(ESTADO)
                 });
             }
 
@@ -276,11 +320,11 @@ public class Controlador {
     //  SETTERS DE VISTAS
     // ---------------------------
     public void setLogin(Vista.Login login) { this.login = login; }
-    public void setMenuProfe(Vista.MenuProfe menuProfe) { }
+    public void setMenuProfe(Vista.MenuProfe menuProfe) {}
     public void setConsultarAlumnos(Vista.ConsultarAlumnos consultarAlumnos) { this.consultarAlumnos = consultarAlumnos; }
     public void setDetalleAlumno(Vista.DetalleAlumno detalleAlumno) { this.detalleAlumno = detalleAlumno; }
     public void setMiPerfil(Vista.MiPerfil miPerfil) { this.miPerfil = miPerfil; }
     public void setMiHorario(Vista.MiHorario miHorario) { this.miHorario = miHorario; }
-    public void setConsultarReu(Vista.ConsultarReu consultarReu) { }
-    public void setOtrosHorarios(Vista.OtrosHorarios otrosHorarios) { }
+    public void setConsultarReu(Vista.ConsultarReu consultarReu) {}
+    public void setOtrosHorarios(Vista.OtrosHorarios otrosHorarios) { this.otrosHorarios = otrosHorarios; }
 }
