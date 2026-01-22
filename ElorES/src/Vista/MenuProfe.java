@@ -138,6 +138,7 @@ public class MenuProfe extends JFrame {
 					cliente.close();
 				} catch (IOException e1) {
 					e1.printStackTrace();
+					System.out.println("Error al cerrar el socket en MenuProfe");
 				}
                 dispose();
         	}

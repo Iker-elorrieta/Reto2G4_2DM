@@ -27,7 +27,7 @@ public class LeerJson {
 		}
 	
 	@GetMapping
-	public ArrayList<Centro> getProfesores() {
+	public ArrayList<Centro> getCentros() {
 		obtenerJson();
 		return centros;
 	}

@@ -5,14 +5,10 @@ import java.awt.Image;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
-
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-
 import Controlador.Controlador;
-
 import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -28,7 +24,7 @@ public class Login extends JFrame {
     private JTextField tfcorreo;
     private JLabel lblError;
     private JButton btnAcceder;
-    
+
     private JPasswordField tfcontraseña;
     
     Controlador controlador = new Controlador(this);
@@ -38,6 +34,9 @@ public class Login extends JFrame {
      * Create the frame.
      */
     public Login(Socket cliente, DataInputStream dis, DataOutputStream dos) {
+    	
+    	controlador.comprobarConexcion();
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 706, 485);
         contentPane = new JPanel();
@@ -95,7 +94,7 @@ public class Login extends JFrame {
         
         
         btnAcceder.addActionListener(e -> {
-        	 int id = controlador.validarUsuario(cliente, dis, dos);
+        	 int id = controlador.validarUsuario(controlador.getCliente(), controlador.getDis(), controlador.getDos());
              if(id != -1 ) {
                  this.dispose();
              }

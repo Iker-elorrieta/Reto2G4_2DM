@@ -2,10 +2,14 @@ package Controlador;
 
 import java.util.ArrayList;
 
+import com.example.ElorServ.Centro;
+import com.example.ElorServ.LeerJson;
+
 import modelo.*;
 
 public class Controlador {
 
+	LeerJson leerJson = new LeerJson();
 	Consultas gestor = new Consultas();
 	
 	public ArrayList<Users> obtenerProfesores() {
@@ -20,5 +24,20 @@ public class Controlador {
 	public ArrayList<Horarios> obtenerHorarioProfe(int profesorId) {
 		return gestor.obtenerHorarioProfe(profesorId);
 	}
+	
+	public ArrayList<Reuniones> obtenerReunionesPorProfesor(int profesorId) {
+		return gestor.obtenerReunionesPorProfesor(profesorId);
+	}
+	
+	public String obtenerNombreCentroPorId(String idCentro) {
 
+		
+	    ArrayList<Centro> centros = leerJson.getCentros();
+	    for (Centro c : centros) {
+	        if (c.getCCEN().equals(idCentro)) {
+	            return c.getNOM(); // ← ahora sí devuelve el nombre
+	        }
+	    }
+	    return null;
+	}
 }

@@ -89,6 +89,19 @@ public class Consultas {
 	        };
 	     return listaReuniones;
 	}
+	
+	public ArrayList<Reuniones> obtenerReunionesPorProfesor(int profesorId) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		
+		 String hql = "from Reuniones where usersByProfesorId.id = " + profesorId;
+	        Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
+	        List<Reuniones> filas = q.list();
+	        for (int i = 0; i < filas.size(); i++) {
+	        	Reuniones reunion = (Reuniones) filas.get(i);
+	            listaReuniones.add(reunion);
+	        };
+	     return listaReuniones;
+	}
 
 	public ArrayList<Users> obtenerAlumnos(int profesorId) {
 	    ArrayList<Users> listaAlumnos = new ArrayList<>();

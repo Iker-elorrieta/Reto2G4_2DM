@@ -26,6 +26,8 @@ public class Controlador {
 	private Vista.MiPerfil miPerfil;
 	private Vista.MiHorario miHorario;
 	private Vista.DetalleAlumno detalleAlumno;
+	private Vista.ConsultarAlumnos consultarAlumnos;
+	private Vista.ConsultarReu consultarReu;
 	
 	private static final String EMAIL = "email";
 	private static final String NOMBRE = "nombre";
@@ -35,6 +37,10 @@ public class Controlador {
 	private static final String DIRECCION = "direccion";
 	private static final String TELEFONO1 = "telefono1";
 	private static final String ID = "id";
+	private static final String Estado = "estado";
+	private static final String Profesor = "profesor";
+	private static final String Alumno = "alumno";
+	private static final String Centro = "centro";
 	
 	public Controlador(Vista.Login login) {
 	    this.login = login;
@@ -52,11 +58,22 @@ public class Controlador {
 		this.detalleAlumno = detalleAlumno;
 	}
 	
+	public Controlador(Vista.ConsultarAlumnos consultarAlumnos) {
+		this.setConsultarAlumnos(consultarAlumnos);
+	}
+	
+	public Controlador(Vista.ConsultarReu consultarReu) {
+		this.setConsultarReu(consultarReu);
+		
+	}
 	public Controlador() {
+		
 		
 	}
 	
-    
+  
+	
+	
     public int validarUsuario(Socket cliente, DataInputStream dis, DataOutputStream dos) {
 
     	int mensaje = 0;
@@ -125,7 +142,7 @@ public class Controlador {
 	        Map<String, Object> usuarioEncontrado = null;
 
 	        for (Map<String, Object> usuario : listaUsuarios) {
-	            Double usuarioId = Double.parseDouble(String.valueOf(usuario.get("id")));
+	            Double usuarioId = Double.parseDouble(String.valueOf(usuario.get(ID)));
 	            if (usuarioId == id) {
 	                usuarioEncontrado = usuario;
 	            }
@@ -216,6 +233,7 @@ public class Controlador {
 
             for (Map<String, Object> alumno : listaAlumnos) {
             	int idAlumno = ((Double) alumno.get(ID)).intValue();
+            	System.out.println("ID Alumno: " + idAlumno);
             	String dni = alumno.get(DNI).toString();
                 String nombre = alumno.get(NOMBRE).toString();
                 String apellidos = alumno.get(APELLIDOS).toString();
@@ -234,6 +252,79 @@ public class Controlador {
     	try {
             // Pedir lista de alumnos
             dos.writeUTF("2");
+            dos.flush();
+
+            String json = dis.readUTF();
+
+            Gson gson = new Gson();
+            ArrayList<Map<String, Object>> listaAlumnos = gson.fromJson(
+                    json,
+                    new TypeToken<ArrayList<Map<String, Object>>>() {}.getType()
+            );
+
+
+            Map<String, Object> alumnoEncontrado = null;
+
+            for (Map<String, Object> alumno : listaAlumnos) {
+                int idAlumno2 = ((Double) alumno.get("id")).intValue();
+                if (idAlumno == idAlumno2) {
+                    alumnoEncontrado = alumno;
+                }
+            }
+
+            if (alumnoEncontrado != null) {
+            	detalleAlumno.getLblEmail().setText("Email: " + (String) alumnoEncontrado.get(EMAIL));;
+            	detalleAlumno.getLblNombre().setText("Nombre: " + (String) alumnoEncontrado.get(NOMBRE));
+            	detalleAlumno.getLblUsername().setText("Username: " + (String) alumnoEncontrado.get(USERNAME));
+            	detalleAlumno.getLblApellidos().setText("Apellidos: " + (String) alumnoEncontrado.get(APELLIDOS));
+            	detalleAlumno.getLblDNI().setText("DNI: " + (String) alumnoEncontrado.get(DNI));
+            	detalleAlumno.getLblDireccion().setText("Dirección: " + (String) alumnoEncontrado.get(DIRECCION));
+            	detalleAlumno.getLblTelefono().setText("Teléfono: " + (String) alumnoEncontrado.get(TELEFONO1));
+            	}
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        	detalleAlumno.getLblEmail().setText("Alumno no encontrado");
+        }
+
+    }
+
+    
+    public DefaultTableModel cargarDatosReuniones(DataInputStream dis, DataOutputStream dos, DefaultTableModel model) {
+        try {
+            dos.writeUTF("4");
+            dos.flush();
+
+            String json = dis.readUTF();
+
+            Gson gson = new Gson();
+            ArrayList<Map<String, Object>> listaReuniones = gson.fromJson(
+                    json,
+                    new TypeToken<ArrayList<Map<String, Object>>>() {}.getType()
+            );
+
+            model.setRowCount(0);
+
+            for (Map<String, Object> reunion : listaReuniones) {
+            	String estado = reunion.get(Estado).toString();
+            	String profesor = reunion.get(Profesor).toString();
+                String alumno = reunion.get(Alumno).toString();
+                String centro = reunion.get(Centro).toString();
+
+                model.addRow(new Object[]{profesor, alumno, centro,estado});
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        return model;
+    }
+    
+    public void cargarDatosDetalleReunion(DataInputStream dis, DataOutputStream dos, int idAlumno) {
+    	try {
+            // Pedir lista de alumnos
+            dos.writeUTF("4");
             dos.flush();
 
             String json = dis.readUTF();
@@ -270,6 +361,39 @@ public class Controlador {
         }
     	
     }
+
+	public Vista.ConsultarReu getConsultarReu() {
+		return consultarReu;
+	}
+
+	public void setConsultarReu(Vista.ConsultarReu consultarReu) {
+		this.consultarReu = consultarReu;
+	}
+
+	public Vista.ConsultarAlumnos getConsultarAlumnos() {
+		return consultarAlumnos;
+	}
+
+	public void setConsultarAlumnos(Vista.ConsultarAlumnos consultarAlumnos) {
+		this.consultarAlumnos = consultarAlumnos;
+	}
+	
+	public void comprobarConexcion() {
+	    try {
+	        if (cliente == null) {
+	            cliente = new Socket("localhost", 5000);
+	            dis = new DataInputStream(cliente.getInputStream());
+	            dos = new DataOutputStream(cliente.getOutputStream());
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+	public Socket getCliente() { return cliente; }
+	public DataInputStream getDis() { return dis; }
+	public DataOutputStream getDos() { return dos; }
+
 
 }
 	

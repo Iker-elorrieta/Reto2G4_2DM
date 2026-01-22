@@ -27,7 +27,7 @@ public class ConsultarAlumnos extends JFrame {
     private JPanel contentPane;
     private DefaultTableModel model;
 
-    Controlador controlador = new Controlador();
+    Controlador controlador = new Controlador(); 
 
     public ConsultarAlumnos(Socket cliente, DataInputStream dis, DataOutputStream dos, int idProfe) {
 
@@ -116,7 +116,7 @@ public class ConsultarAlumnos extends JFrame {
                 int fila = table.getSelectedRow();
                 if (fila != -1) {
                     int idAlumno = Integer.parseInt(table.getValueAt(fila, 0).toString());
-
+                    System.out.println("ID Alumno seleccionado: " + idAlumno);
                     DetalleAlumno ficha = new DetalleAlumno(cliente, dis, dos, idProfe, idAlumno);
                     ficha.setVisible(true);
                     dispose();

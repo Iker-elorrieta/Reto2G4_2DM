@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 
 import Controlador.Controlador;
 import modelo.Horarios;
+import modelo.Reuniones;
 import modelo.Users;
 
 public class HiloServidor extends Thread {
@@ -112,7 +113,7 @@ public class HiloServidor extends Thread {
 		            //Caso 1: Ver perfil
 		            //Caso 2: Ver alumnos
 		            //Caso 3: horario del profesor
-		            
+		            //Caso 4: reuniones del profesor
 		            
 		            switch(opcionInt) {
 		             
@@ -154,6 +155,32 @@ public class HiloServidor extends Thread {
 		                String jsonHorario = gsonHorario.toJson(listaEnviar);
 
 		                dos2.writeUTF(jsonHorario);
+		                dos2.flush();
+		                break;
+		                
+		            case 4:
+		                ArrayList<Reuniones> listaReunionesProfe = controlador.obtenerReunionesPorProfesor(Integer.parseInt(idProfe));
+
+		                ArrayList<Map<String, Object>> listaEnviarReuniones = new ArrayList<>();
+
+		                for (Reuniones r : listaReunionesProfe) {
+		                    Map<String, Object> mapa = new java.util.HashMap<>();
+		                    mapa.put("estado", r.getEstado());                  
+		                    mapa.put("profesor", r.getUsersByProfesorId().getNombre());
+		                    mapa.put("alumno", r.getUsersByAlumnoId().getNombre());
+		                    mapa.put("titulo", r.getTitulo());
+		                    mapa.put("asunto", r.getAsunto());
+		                    mapa.put("aula", r.getAula());
+		                    mapa.put("fecha", r.getFecha().toString());
+		                    mapa.put("centro",controlador.obtenerNombreCentroPorId(r.getIdCentro()));
+
+		                    listaEnviarReuniones.add(mapa);
+		                }
+
+		                Gson gsonReuniones= new Gson();
+		                String jsonReuniones = gsonReuniones.toJson(listaEnviarReuniones);
+
+		                dos2.writeUTF(jsonReuniones);
 		                dos2.flush();
 		                break;
 		            }

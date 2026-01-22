@@ -126,7 +126,7 @@ public class DetalleAlumno extends JFrame {
         lblFondo.setIcon(new ImageIcon("fotos/backgroundGRANDE.png"));
         contentPane.add(lblFondo);
 
-         
+         System.out.println("ID ALUMNO EN DETALLE: " + idAlumno);
         controlador.cargarDatosDetalleAlumno(dis, dos, idAlumno);
         
         btnVolver.addActionListener(new ActionListener() {
