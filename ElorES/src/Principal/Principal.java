@@ -1,29 +1,20 @@
 package Principal;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
-
+import Controlador.Controlador;
 import Vista.Login;
 
 public class Principal {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-	
-		try {
-			Socket cliente = new Socket("localhost", 5000);
-			DataInputStream dis = new DataInputStream(cliente.getInputStream());
-			DataOutputStream dos = new DataOutputStream(cliente.getOutputStream());
-			Login login = new Login(cliente,dis,dos);
-			login.setVisible(true);
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 
-	}
+        // Crear el controlador central
+        Controlador controlador = new Controlador();
 
+        // Abrir la conexión con el servidor
+        controlador.conectar();
+
+        // Abrir la ventana de login
+        Login login = new Login(controlador);
+        login.setVisible(true);
+    }
 }

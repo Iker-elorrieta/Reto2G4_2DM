@@ -92,6 +92,7 @@ public class HiloServidor extends Thread {
 
 	        } catch (IOException e) {
 	            e.printStackTrace();
+	            System.out.println("El error aqui");
 	        }
 	 }
 	 
@@ -102,7 +103,10 @@ public class HiloServidor extends Thread {
 
 	   	   int opcionInt = 0;
 	   	try {
+	   		
+
 			 do {
+				 if(cliente != null) {
 		   	        DataInputStream dis2  = new DataInputStream(cliente.getInputStream());
 			        DataOutputStream dos2 = new DataOutputStream(cliente.getOutputStream());
 			        
@@ -114,11 +118,10 @@ public class HiloServidor extends Thread {
 		            //Caso 2: Ver alumnos
 		            //Caso 3: horario del profesor
 		            //Caso 4: reuniones del profesor
+		            //Caso 5: detalles alumnos
 		            
 		            switch(opcionInt) {
 		             
-		            case 33: 
-		            	break;
 		            case 0: 
 		            	cliente.close();
 		            	break;
@@ -183,9 +186,16 @@ public class HiloServidor extends Thread {
 		                dos2.writeUTF(jsonReuniones);
 		                dos2.flush();
 		                break;
+		            case 5:
+		            	Gson gsonAlumnos2 = new Gson();
+		            	String jsonAlum2 = gsonAlumnos2.toJson(listaAlumnos);
+		            	dos2.writeUTF(jsonAlum2);
+		            	dos2.flush();
+		            	break;
 		            }
-		        
+				 		}    
 		   	     }while(opcionInt != 0);
+	   		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

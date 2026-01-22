@@ -1,53 +1,41 @@
 package Vista;
 
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.net.Socket;
-
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 
+import Controlador.Controlador;
 
 public class ConsultarReu extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	private JLabel lblLogo;
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+
+    private JLabel lblLogo;
     private JLabel lblFondo;
+
     private JButton btnVolver;
-    private JButton btnLogin;
+    private JButton btnSalir;
+
     private JTable table;
     private DefaultTableModel model;
-    private Controlador.Controlador controlador = new Controlador.Controlador(this);
-    
-	/**
-	 * Create the frame.
-	 * @param id 
-	 * @param dos 
-	 * @param dis 
-	 * @param cliente 
-	 */
-	public ConsultarReu(Socket cliente, DataInputStream dis, DataOutputStream dos, int id) {
-		setTitle("Consultar mis reuniones");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 534);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(null);
-		
-		// LOGO
+
+
+    public ConsultarReu(Controlador controlador, int idProfe) {
+
+        controlador.setConsultarReu(this);
+
+        setTitle("Consultar mis reuniones");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 800, 534);
+
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+
+        // LOGO
         lblLogo = new JLabel();
         lblLogo.setBounds(327, 44, 120, 120);
         ImageIcon icono = new ImageIcon("fotos/logo.png");
@@ -58,71 +46,63 @@ public class ConsultarReu extends JFrame {
         );
         lblLogo.setIcon(new ImageIcon(imagen));
         contentPane.add(lblLogo);
-        
-        // Botón volver
+
+        // BOTÓN VOLVER
         btnVolver = new JButton("");
-		btnVolver.setIcon(new ImageIcon("fotos/volver.png"));
-		btnVolver.setBounds(10, 11, 45, 45);
-		btnVolver.setContentAreaFilled(false);
-		btnVolver.setBorderPainted(false);
-		btnVolver.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		GestionReuniones gestionReuniones = new GestionReuniones(cliente, dis, dos, id);
-        		gestionReuniones.setVisible(true);
-        		dispose();
-        	}
+        btnVolver.setIcon(new ImageIcon("fotos/volver.png"));
+        btnVolver.setBounds(10, 11, 45, 45);
+        btnVolver.setContentAreaFilled(false);
+        btnVolver.setBorderPainted(false);
+        btnVolver.addActionListener(e -> {
+            GestionReuniones ventana = new GestionReuniones(controlador, idProfe);
+            ventana.setVisible(true);
+            dispose();
         });
-		contentPane.add(btnVolver);
-		
-		// Botón salir
-		btnLogin = new JButton("");
-		btnLogin.setIcon(new ImageIcon("fotos/salir.png"));
-		btnLogin.setBounds(729, 11, 45, 45);
-		btnLogin.setContentAreaFilled(false);
-        btnLogin.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		Login login = new Login(cliente, dis, dos);
-        		login.setVisible(true);   // MOSTRAR login
-                dispose();
-        	}
+        contentPane.add(btnVolver);
+
+        // BOTÓN SALIR
+        btnSalir = new JButton("");
+        btnSalir.setIcon(new ImageIcon("fotos/salir.png"));
+        btnSalir.setBounds(729, 11, 45, 45);
+        btnSalir.setContentAreaFilled(false);
+        btnSalir.setBorderPainted(false);
+        btnSalir.addActionListener(e -> {
+            Login login = new Login(controlador);
+            login.setVisible(true);
+            dispose();
         });
-		btnLogin.setBorderPainted(false);
-		contentPane.add(btnLogin);
-        
-		 String[] columnas = {"Profesor", "Alumno", "Centro", "Estado"};
+        contentPane.add(btnSalir);
 
-	        model = new DefaultTableModel(columnas, 0) {
-	 
-				private static final long serialVersionUID = 1L;
+        // TABLA
+        String[] columnas = {"Profesor", "Alumno", "Centro", "Estado"};
 
-				@Override
-	            public boolean isCellEditable(int row, int column) {
-	                return false;
-	            }
-	        };
-		
+        model = new DefaultTableModel(columnas, 0) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setBounds(198, 114, 435, 283);
         contentPane.add(scrollPane);
-        
-        table = new JTable(model); // ← asignas el modelo desde el principio
+
+        table = new JTable(model);
         scrollPane.setViewportView(table);
 
-        model = controlador.cargarDatosReuniones(dis, dos, model);
-        table.setModel(model); // ← aseguras que la tabla use el modelo actualizado
+        // CARGAR DATOS DESDE EL CONTROLADOR
+        controlador.cargarReuniones(model);
 
-        
         // FONDO
         lblFondo = new JLabel("");
         lblFondo.setBounds(0, 0, 800, 534);
         lblFondo.setIcon(new ImageIcon("fotos/backgroundGRANDE.png"));
         contentPane.add(lblFondo);
+    }
 
-        
-	}
-	
-	
-	
-	
-	
+    public DefaultTableModel getModel() {
+        return model;
+    }
 }
