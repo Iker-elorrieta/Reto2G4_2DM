@@ -16,9 +16,6 @@ public class ConsultarReu extends JFrame {
     private JLabel lblFondo;
 
     private JButton btnVolver;
-    private JButton btnSalir;
-
-    private JTable table;
     private DefaultTableModel model;
 
 
@@ -60,19 +57,6 @@ public class ConsultarReu extends JFrame {
         });
         contentPane.add(btnVolver);
 
-        // BOTÓN SALIR
-        btnSalir = new JButton("");
-        btnSalir.setIcon(new ImageIcon("fotos/salir.png"));
-        btnSalir.setBounds(729, 11, 45, 45);
-        btnSalir.setContentAreaFilled(false);
-        btnSalir.setBorderPainted(false);
-        btnSalir.addActionListener(e -> {
-            Login login = new Login(controlador);
-            login.setVisible(true);
-            dispose();
-        });
-        contentPane.add(btnSalir);
-
         // TABLA
         String[] columnas = {"Profesor", "Alumno", "Centro", "Estado"};
 
@@ -84,13 +68,6 @@ public class ConsultarReu extends JFrame {
                 return false;
             }
         };
-
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(198, 114, 435, 283);
-        contentPane.add(scrollPane);
-
-        table = new JTable(model);
-        scrollPane.setViewportView(table);
 
         // CARGAR DATOS DESDE EL CONTROLADOR
         controlador.cargarReuniones(model);

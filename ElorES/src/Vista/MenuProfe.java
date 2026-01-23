@@ -1,6 +1,7 @@
 package Vista;
 
 import java.awt.*;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -89,8 +90,9 @@ public class MenuProfe extends JFrame {
         btnSalir.setContentAreaFilled(false);
         btnSalir.setBorderPainted(false);
         btnSalir.addActionListener(e -> {
-            Login login = new Login(controlador);
+            Login login = new Login(new Controlador());
             login.setVisible(true);
+			controlador.cerrarConexion();
             dispose();
         });
         contentPane.add(btnSalir);

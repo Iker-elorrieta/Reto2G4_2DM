@@ -62,19 +62,6 @@ public class CrearReu extends JFrame {
         });
         contentPane.add(btnVolver);
 
-        // BOTÓN SALIR
-        JButton btnSalir = new JButton("");
-        btnSalir.setIcon(new ImageIcon("fotos/salir.png"));
-        btnSalir.setBounds(729, 11, 45, 45);
-        btnSalir.setContentAreaFilled(false);
-        btnSalir.setBorderPainted(false);
-        btnSalir.addActionListener(e -> {
-            Login login = new Login(controlador);
-            login.setVisible(true);
-            dispose();
-        });
-        contentPane.add(btnSalir);
-
         // CAMPOS Y LABELS
         JLabel lblNombre = new JLabel("Nombre Reunión:");
         lblNombre.setForeground(Color.WHITE);

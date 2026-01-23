@@ -19,6 +19,8 @@ import modelo.Users;
 public class HiloServidor extends Thread {
 
     private Socket cliente;
+    ArrayList<Users> listaUsuarios = new ArrayList<Users>();
+    ArrayList<Users> listaAlumnos = new ArrayList<Users>();
 
 
     public HiloServidor(Socket cliente, String userEmail, String userContraseña) {
@@ -64,25 +66,27 @@ public class HiloServidor extends Thread {
                 }
 
                 if (correcto) {
-                    dos.writeUTF(idProfe);
+                    dos.writeUTF(idProfe);                    
+                    menu(idProfe, dis, dos, controlador);
+
                 } else {
                     dos.writeUTF("-1");
                 }
+                
             }
 
-            menu(idProfe, dis, dos);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void menu(String idProfe, DataInputStream dis, DataOutputStream dos) {
+    private void menu(String idProfe, DataInputStream dis, DataOutputStream dos, Controlador controlador) {
 
-        Controlador controlador = new Controlador();
-
-        ArrayList<Users> listaUsuarios = controlador.obtenerProfesores();
-        ArrayList<Users> listaAlumnos = controlador.obtenerAlumnos(Integer.parseInt(idProfe));
+    	 listaUsuarios = controlador.obtenerProfesores();
+         if (idProfe != null) {
+     		listaAlumnos = controlador.obtenerAlumnos(Integer.parseInt(idProfe));
+         }
 
         int opcionInt = 0;
 
@@ -96,7 +100,7 @@ public class HiloServidor extends Thread {
                 switch (opcionInt) {
 
                     case 0:
-                        cliente.close();
+                    	cliente.close();
                         break;
 
                     case 1: {

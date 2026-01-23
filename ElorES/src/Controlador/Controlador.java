@@ -39,7 +39,7 @@ public class Controlador {
     // ---------------------------
     //  CONEXIÓN ÚNICA
     // ---------------------------
-    private Socket cliente;
+    public Socket cliente;
     private DataInputStream dis;
     private DataOutputStream dos;
     private Map<String, Integer> mapaProfesores = new HashMap<>();
@@ -68,7 +68,7 @@ public class Controlador {
                 cliente = new Socket("localhost", 5000);
                 dis = new DataInputStream(cliente.getInputStream());
                 dos = new DataOutputStream(cliente.getOutputStream());
-            }
+            } 
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -80,6 +80,11 @@ public class Controlador {
     public int validarUsuario() {
 
         try {
+        	
+        	if (cliente == null || cliente.isClosed()) { 
+        		conectar(); 
+        		}
+        	
             String correo = login.getTfcorreo().getText();
             String pass = new String(login.getTfcontraseña().getPassword());
 
@@ -372,6 +377,21 @@ public class Controlador {
             e.printStackTrace();
         }
     }
+    
+    
+    
+    public void cerrarConexion() {
+        try {
+            dos.writeUTF("0");
+            dos.flush();
+            cliente.close();
+            dis.close();
+            dos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     // ---------------------------
     //  SETTERS DE VISTAS
