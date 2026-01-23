@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.MutationQuery;
 import org.hibernate.query.Query;
 
 import modelo.*;
@@ -91,6 +93,7 @@ public class Consultas {
 	}
 	
 	public ArrayList<Reuniones> obtenerReunionesPorProfesor(int profesorId) {
+	     listaReuniones.clear();
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		
 		 String hql = "from Reuniones where usersByProfesorId.id = " + profesorId;
@@ -153,6 +156,29 @@ public class Consultas {
 		
 		return listaHorarios;
 	}
+
+
+	public void actualizarReunion(Integer idReunion, String estado) {
+
+	    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+
+	        Transaction tx = session.beginTransaction();
+
+	        String hql = "UPDATE Reuniones r SET r.estado = :estado WHERE r.idReunion = :id";
+
+	        MutationQuery query = session.createMutationQuery(hql);
+	        query.setParameter("estado", estado);
+	        query.setParameter("id", idReunion);
+
+	        int filas = query.executeUpdate();
+
+	        tx.commit();
+
+	        System.out.println("Filas actualizadas: " + filas);
+	    }
+	}
+
+
 
 
 

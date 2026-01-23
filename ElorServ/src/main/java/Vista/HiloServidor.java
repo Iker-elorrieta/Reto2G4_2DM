@@ -21,6 +21,7 @@ public class HiloServidor extends Thread {
     private Socket cliente;
     ArrayList<Users> listaUsuarios = new ArrayList<Users>();
     ArrayList<Users> listaAlumnos = new ArrayList<Users>();
+    ArrayList<Reuniones> listaReunionesProfe = new ArrayList<Reuniones>();
 
 
     public HiloServidor(Socket cliente, String userEmail, String userContraseña) {
@@ -38,7 +39,7 @@ public class HiloServidor extends Thread {
 
         String idProfe = null;
         Controlador controlador = new Controlador();
-        ArrayList<Users> listaUsuarios = controlador.obtenerProfesores();
+        listaUsuarios = controlador.obtenerProfesores();
 
         try {
 
@@ -67,7 +68,7 @@ public class HiloServidor extends Thread {
 
                 if (correcto) {
                     dos.writeUTF(idProfe);                    
-                    menu(idProfe, dis, dos, controlador);
+                    menu(idProfe, dis, dos, controlador, listaUsuarios);
 
                 } else {
                     dos.writeUTF("-1");
@@ -81,9 +82,8 @@ public class HiloServidor extends Thread {
         }
     }
 
-    private void menu(String idProfe, DataInputStream dis, DataOutputStream dos, Controlador controlador) {
+    private void menu(String idProfe, DataInputStream dis, DataOutputStream dos, Controlador controlador, ArrayList<Users> listaUsuarios) {
 
-    	 listaUsuarios = controlador.obtenerProfesores();
          if (idProfe != null) {
      		listaAlumnos = controlador.obtenerAlumnos(Integer.parseInt(idProfe));
          }
@@ -143,13 +143,14 @@ public class HiloServidor extends Thread {
                     }
 
                     case 4: {
-                        ArrayList<Reuniones> listaReunionesProfe =
+                         listaReunionesProfe =
                                 controlador.obtenerReunionesPorProfesor(Integer.parseInt(idProfe));
 
                         ArrayList<Map<String, Object>> listaEnviar = new ArrayList<>();
 
                         for (Reuniones r : listaReunionesProfe) {
                             Map<String, Object> mapa = new java.util.HashMap<>();
+                            mapa.put("id", r.getIdReunion());
                             mapa.put("estado", r.getEstado());
                             mapa.put("profesor", r.getUsersByProfesorId().getNombre());
                             mapa.put("alumno", r.getUsersByAlumnoId().getNombre());
@@ -194,6 +195,18 @@ public class HiloServidor extends Thread {
                         dos.writeUTF(json);
                         dos.flush();
                         break;
+                    }
+                    case 6: {
+                    	int id = Integer.parseInt(dis.readUTF());
+                    	String estado = dis.readUTF();
+                    	for(Reuniones r : listaReunionesProfe) {
+                    		if(id ==  r.getIdReunion()) {
+                    			r.setEstado(estado); 
+                    			System.out.println(estado);
+                    			controlador.actualizarReunion(r.getIdReunion(), r.getEstado());
+                    		}
+                    	}
+                    	break;
                     }
                 }
 

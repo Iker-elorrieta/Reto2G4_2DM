@@ -1,8 +1,12 @@
 package Vista;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.awt.Image;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import Controlador.Controlador;
@@ -16,8 +20,10 @@ public class ConsultarReu extends JFrame {
     private JLabel lblFondo;
 
     private JButton btnVolver;
-    private DefaultTableModel model;
+    private JButton btnPendientes;
 
+    private JTable table;
+    private DefaultTableModel modelo;
 
     public ConsultarReu(Controlador controlador, int idProfe) {
 
@@ -34,7 +40,7 @@ public class ConsultarReu extends JFrame {
 
         // LOGO
         lblLogo = new JLabel();
-        lblLogo.setBounds(327, 44, 120, 120);
+        lblLogo.setBounds(327, 11, 120, 120);
         ImageIcon icono = new ImageIcon("fotos/logo.png");
         Image imagen = icono.getImage().getScaledInstance(
                 lblLogo.getWidth(),
@@ -56,22 +62,85 @@ public class ConsultarReu extends JFrame {
             dispose();
         });
         contentPane.add(btnVolver);
+        
+        //BOTON PENDIENTES
+       btnPendientes = new JButton("Pendientes");
+       btnPendientes.setBounds(652, 32, 109, 36);
+       btnPendientes.setBackground(new Color(232, 220, 202));
+       btnPendientes.setForeground(Color.BLACK);
+       btnPendientes.setFont(new Font("Segoe UI", Font.BOLD, 14));
+       contentPane.add(btnPendientes);
+       btnPendientes.addActionListener(e -> {
+    	   GestionPendientes pendientes = new GestionPendientes(controlador, idProfe);
+    	   pendientes.setVisible(true);
+    	   this.dispose();
+       });
+       
 
-        // TABLA
-        String[] columnas = {"Profesor", "Alumno", "Centro", "Estado"};
+     // TABLA DEL HORARIO
+        String[] columnas = {"Hora", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
+        modelo = new DefaultTableModel(columnas, 6);
 
-        model = new DefaultTableModel(columnas, 0) {
-            private static final long serialVersionUID = 1L;
+        // Rellenar columna de horas
+        for (int i = 0; i < 6; i++) {
+            modelo.setValueAt("Hora " + (i + 1), i, 0);
+        }
 
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
+        table = new JTable(modelo);
+        table.setEnabled(false);
+        
+        
+        table.setDefaultRenderer(Object.class, new javax.swing.table.TableCellRenderer() {
+
+            DefaultTableCellRenderer base = new DefaultTableCellRenderer();
+
+            public Component getTableCellRendererComponent(
+                    JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
+
+                Component c = base.getTableCellRendererComponent(
+                        table, value, isSelected, hasFocus, row, column);
+
+                c.setForeground(Color.BLACK);
+                c.setBackground(Color.WHITE);
+
+                if (value != null && value.toString().startsWith("Reunión")) {
+
+                    String texto = value.toString(); 
+                    String id = texto.replace("Reunión", "").split("con")[0].trim(); 
+
+                    String estado = controlador.getEstadoReunion("Reunion" + id);
+
+                    if (estado != null) {
+                        if (estado.equals("pendiente")) {
+                            c.setBackground(new Color(255, 255, 150)); 
+                        }
+                        else if (estado.equals("aceptada")) {
+                            c.setBackground(new Color(150, 255, 150));
+                        }
+                        else if (estado.equals("denegada")) {
+                            c.setBackground(new Color(255, 120, 120)); 
+                        }
+                        else if (estado.equals("conflicto")) {
+                            c.setBackground(new Color(180, 180, 180)); 
+                        }
+                    }
+                }
+
+                return c;
             }
-        };
+        });
+
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBounds(20, 142, 754, 330);
+        contentPane.add(scrollPane);
 
         // CARGAR DATOS DESDE EL CONTROLADOR
-        controlador.cargarReuniones(model);
-
+        
+        controlador.cargarHorarioReuniones();
+        controlador.CargarReuniones();
+        
         // FONDO
         lblFondo = new JLabel("");
         lblFondo.setBounds(0, 0, 800, 534);
@@ -79,7 +148,11 @@ public class ConsultarReu extends JFrame {
         contentPane.add(lblFondo);
     }
 
-    public DefaultTableModel getModel() {
-        return model;
-    }
+	public DefaultTableModel getModelo() {
+		return modelo;
+	}
+
+	public JTable getTable() {
+		return table;
+	}
 }

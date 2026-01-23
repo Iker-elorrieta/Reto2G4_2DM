@@ -44,4 +44,9 @@ public class Controlador {
 	public ArrayList<Horarios> obtenerHorarios() {
 		return gestor.obtenerHorarios();
 	}
+
+	public void actualizarReunion(Integer idCentro, String Estado) {
+		gestor.actualizarReunion(idCentro, Estado);
+		
+	}
 }
