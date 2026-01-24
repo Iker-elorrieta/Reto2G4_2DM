@@ -17,7 +17,7 @@ public class Controlador {
 	}
 
 	public ArrayList<Users> obtenerAlumnos(int profesorId) {
-
+		
 		return gestor.obtenerAlumnos(profesorId);
 	}
 	

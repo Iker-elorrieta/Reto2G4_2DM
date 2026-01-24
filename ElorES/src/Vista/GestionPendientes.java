@@ -104,8 +104,10 @@ public class GestionPendientes extends JFrame {
         btnAceptar.setBounds(662, 257, 89, 23);
         btnAceptar.addActionListener(e -> {
             if (idSeleccionado != 0) {
-                controlador.cambiarEstadoReunion(idSeleccionado, "aceptado");
-                controlador.cargarPendientes();
+                controlador.cambiarEstadoReunion(idSeleccionado, "aceptada");
+                ConsultarReu gestion = new ConsultarReu(controlador, idProfe);
+                gestion.setVisible(true);
+                this.dispose();
             }
         });
         contentPane.add(btnAceptar);
@@ -115,8 +117,10 @@ public class GestionPendientes extends JFrame {
         btnRechazar.setBounds(662, 362, 89, 23);
         btnRechazar.addActionListener(e -> {
             if (idSeleccionado != 0) {
-                controlador.cambiarEstadoReunion(idSeleccionado, "denegado");
-                controlador.cargarPendientes(); 
+                controlador.cambiarEstadoReunion(idSeleccionado, "denegada");
+                ConsultarReu gestion = new ConsultarReu(controlador, idProfe);
+                gestion.setVisible(true);
+                this.dispose();
             }
         });
         contentPane.add(btnRechazar);

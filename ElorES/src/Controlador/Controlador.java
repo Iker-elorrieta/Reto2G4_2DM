@@ -488,7 +488,7 @@ public class Controlador {
 	        for (Map<String, Object> h : lista) {
 	        	String estado = h.get("estado").toString();
 	        	
-	        	if(estado.equals("pendiente")) {
+	        	if(estado.equals("pendiente") || estado.equals("conflicto")) {
 	        		pendientes.getModelo().addRow(new Object[]{
 	        				h.get(ID),
 	        			    h.get(PROFESOR),
@@ -502,6 +502,7 @@ public class Controlador {
 	        		
 	        	}
 	        }
+	        lista.clear();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -514,9 +515,6 @@ public class Controlador {
             dos.writeUTF(String.valueOf(idReu));  
             dos.writeUTF(nuevoEstado);
             dos.flush();
-
-            String respuesta = dis.readUTF();
-            System.out.println("Servidor: " + respuesta);
 
         } catch (IOException e) {
             e.printStackTrace();
