@@ -21,13 +21,14 @@ public class CrearReu extends JFrame {
     private JLabel lblUbicacion;
     private JLabel lblMiembros;
     private JLabel lblEstado;
+    private JComboBox<String> comboUbicacion;
 
     private JTextField txtNombre;
 
 
     public CrearReu(Controlador controlador, int idProfe) {
 
-        controlador.setConsultarReu(null); // para despues
+        controlador.setCrearReu(this); 
 
         setTitle("Crear Reuniones");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -131,10 +132,7 @@ public class CrearReu extends JFrame {
         lblUbicacion.setBounds(439, 317, 128, 14);
         contentPane.add(lblUbicacion);
 
-        JComboBox<String> comboUbicacion = new JComboBox<>();
-        comboUbicacion.setModel(new DefaultComboBoxModel<>(new String[]{
-                "Elorrieta-Errekamari LHII"
-        }));
+        comboUbicacion = new JComboBox<>();
         comboUbicacion.setBounds(589, 313, 171, 30);
         contentPane.add(comboUbicacion);
 
@@ -143,5 +141,12 @@ public class CrearReu extends JFrame {
         lblFondo.setBounds(0, 0, 800, 534);
         lblFondo.setIcon(new ImageIcon("fotos/backgroundGRANDE.png"));
         contentPane.add(lblFondo);
+        
+        controlador.cargarCentros();
     }
+
+
+	public JComboBox<String> getComboUbicacion() {return comboUbicacion;}
+
+    
 }

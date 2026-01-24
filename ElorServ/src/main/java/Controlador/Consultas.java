@@ -33,7 +33,7 @@ public class Consultas {
 	            Users user = (Users) filas.get(i);
 	            listaUsuarios.add(user);
 	        };
-	     return listaUsuarios;
+	     return  listaUsuarios;
 	}
 	
 	

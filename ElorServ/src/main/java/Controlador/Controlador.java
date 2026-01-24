@@ -30,8 +30,6 @@ public class Controlador {
 	}
 	
 	public String obtenerNombreCentroPorId(String idCentro) {
-
-		
 	    ArrayList<Centro> centros = leerJson.getCentros();
 	    for (Centro c : centros) {
 	        if (c.getCCEN().equals(idCentro)) {
@@ -41,6 +39,7 @@ public class Controlador {
 	    return null;
 	}
 	
+	
 	public ArrayList<Horarios> obtenerHorarios() {
 		return gestor.obtenerHorarios();
 	}
@@ -48,5 +47,10 @@ public class Controlador {
 	public void actualizarReunion(Integer idCentro, String Estado) {
 		gestor.actualizarReunion(idCentro, Estado);
 		
+	}
+
+	public ArrayList<Centro> leerJson() {
+		ArrayList<Centro> centros = leerJson.getCentros();
+		return centros;
 	}
 }

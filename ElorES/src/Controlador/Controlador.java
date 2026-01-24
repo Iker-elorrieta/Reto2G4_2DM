@@ -66,6 +66,7 @@ public class Controlador {
     private Vista.OtrosHorarios otrosHorarios;
     private Vista.ConsultarReu consultarReu;
     private Vista.GestionPendientes pendientes;
+    private Vista.CrearReu crearReuniones;
     
     // ---------------------------
     //  CONSTRUCTOR
@@ -520,6 +521,30 @@ public class Controlador {
             e.printStackTrace();
         }
     }
+    
+    
+    public void cargarCentros() {
+        try {
+            dos.writeUTF("7");
+            dos.flush();
+
+            String json = dis.readUTF();
+            Gson gson = new Gson();
+
+            ArrayList<String> lista =
+                gson.fromJson(json, new TypeToken<ArrayList<String>>() {}.getType());
+
+            crearReuniones.getComboUbicacion().removeAllItems();
+
+            for (String centro : lista) {
+                crearReuniones.getComboUbicacion().addItem(centro);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     
     
@@ -550,5 +575,6 @@ public class Controlador {
     public void setOtrosHorarios(Vista.OtrosHorarios otrosHorarios) { this.otrosHorarios = otrosHorarios; }
     public String getEstadoReunion(String clave) {return estadosReuniones.get(clave);}
     public void setGestionPendientes(Vista.GestionPendientes pendientes) {this.pendientes = pendientes;}
+    public void setCrearReu(Vista.CrearReu crearReuniones) {this.crearReuniones = crearReuniones;}
 
 }

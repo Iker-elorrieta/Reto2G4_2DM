@@ -7,8 +7,11 @@ import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import com.example.ElorServ.Centro;
 import com.google.gson.Gson;
 
 import Controlador.Controlador;
@@ -22,7 +25,7 @@ public class HiloServidor extends Thread {
     ArrayList<Users> listaUsuarios = new ArrayList<Users>();
     ArrayList<Users> listaAlumnos = new ArrayList<Users>();
     ArrayList<Reuniones> listaReunionesProfe = new ArrayList<Reuniones>();
-
+    ArrayList<Reuniones> listaCentros = new ArrayList<Reuniones>();
 
     public HiloServidor(Socket cliente, String userEmail, String userContraseña) {
         this.cliente = cliente;
@@ -208,6 +211,24 @@ public class HiloServidor extends Thread {
                     	}
                     	break;
                     }
+                    case 7: {
+                        ArrayList<Centro> centros = controlador.leerJson(); 
+
+                        Set<String> centrosUnicos = new HashSet<>();
+
+                        for (Centro c : centros) {
+                            if (c.getNOM() != null) {
+                                centrosUnicos.add(c.getNOM());
+                            }
+                        }
+
+                        Gson gson = new Gson();
+                        dos.writeUTF(gson.toJson(centrosUnicos));
+                        dos.flush();
+                        break;
+                    }
+
+
                 }
 
             } while (opcionInt != 0);
