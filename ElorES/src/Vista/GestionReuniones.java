@@ -16,7 +16,7 @@ public class GestionReuniones extends JFrame {
 
     public GestionReuniones(Controlador controlador, int idProfe) {
 
-        controlador.setConsultarReu(null); // para despues
+        controlador.setGestionReuniones(this); 
         setTitle("Gestionar Reuniones");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 706, 485);

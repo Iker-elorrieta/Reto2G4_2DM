@@ -21,6 +21,10 @@ public class Controlador {
 		return gestor.obtenerAlumnos(profesorId);
 	}
 	
+	public ArrayList<Users> obtenerTodosAlumnos() {
+		return gestor.obtenerTodosAlumnos();
+	}
+	
 	public ArrayList<Horarios> obtenerHorarioProfe(int profesorId) {
 		return gestor.obtenerHorarioProfe(profesorId);
 	}
@@ -52,5 +56,11 @@ public class Controlador {
 	public ArrayList<Centro> leerJson() {
 		ArrayList<Centro> centros = leerJson.getCentros();
 		return centros;
+	}
+
+	public void crearReunion(Reuniones reunion) {
+		
+		gestor.crearReunion(reunion);
+		
 	}
 }

@@ -20,10 +20,15 @@ public class CrearReu extends JFrame {
     private JLabel lblAula;
     private JLabel lblUbicacion;
     private JLabel lblMiembros;
-    private JLabel lblEstado;
     private JComboBox<String> comboUbicacion;
+    private JComboBox<String> comboMiembros;
+    private JComboBox<String> comboAula;
 
     private JTextField txtNombre;
+    private JSpinner spinnerHora;
+    private JTextArea taTema;
+    private JDateChooser dateChooser;
+    private JLabel lblError;
 
 
     public CrearReu(Controlador controlador, int idProfe) {
@@ -73,25 +78,25 @@ public class CrearReu extends JFrame {
         txtNombre.setBounds(129, 190, 208, 29);
         contentPane.add(txtNombre);
 
-        lblFechaYHora = new JLabel("Fecha y Hora:");
+        lblFechaYHora = new JLabel("Fecha:");
         lblFechaYHora.setForeground(Color.WHITE);
         lblFechaYHora.setBounds(27, 259, 128, 14);
         contentPane.add(lblFechaYHora);
 
-        JDateChooser dateChooser = new JDateChooser();
+        dateChooser = new JDateChooser();
         dateChooser.setBounds(129, 255, 208, 24);
         contentPane.add(dateChooser);
 
         lblAula = new JLabel("Aula:");
         lblAula.setForeground(Color.WHITE);
-        lblAula.setBounds(27, 317, 128, 14);
+        lblAula.setBounds(451, 219, 128, 14);
         contentPane.add(lblAula);
 
-        JComboBox<String> comboAula = new JComboBox<>();
+        comboAula = new JComboBox<>();
         comboAula.setModel(new DefaultComboBoxModel<>(new String[]{
                 "", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
         }));
-        comboAula.setBounds(129, 302, 208, 30);
+        comboAula.setBounds(586, 211, 171, 30);
         contentPane.add(comboAula);
 
         lblTema = new JLabel("Tema:");
@@ -99,42 +104,48 @@ public class CrearReu extends JFrame {
         lblTema.setBounds(27, 381, 128, 14);
         contentPane.add(lblTema);
 
-        JTextArea textAreaTema = new JTextArea();
-        textAreaTema.setBounds(129, 376, 207, 93);
-        contentPane.add(textAreaTema);
+        taTema = new JTextArea();
+        taTema.setBounds(129, 376, 207, 93);
+        contentPane.add(taTema);
 
         lblMiembros = new JLabel("Miembros:");
         lblMiembros.setForeground(Color.WHITE);
-        lblMiembros.setBounds(439, 202, 128, 14);
+        lblMiembros.setBounds(451, 286, 128, 14);
         contentPane.add(lblMiembros);
 
-        JComboBox<String> comboMiembros = new JComboBox<>();
-        comboMiembros.setModel(new DefaultComboBoxModel<>(new String[]{
-                "", "Profesores", "Profesores y Alumnos"
-        }));
-        comboMiembros.setBounds(589, 189, 171, 30);
+        comboMiembros = new JComboBox<>();
+        comboMiembros.setBounds(586, 278, 171, 30);
         contentPane.add(comboMiembros);
-
-        lblEstado = new JLabel("Estado:");
-        lblEstado.setForeground(Color.WHITE);
-        lblEstado.setBounds(439, 259, 128, 14);
-        contentPane.add(lblEstado);
-
-        JComboBox<String> comboEstado = new JComboBox<>();
-        comboEstado.setModel(new DefaultComboBoxModel<>(new String[]{
-                "", "Pendiente", "Conflicto", "Aceptada", "Cancelada"
-        }));
-        comboEstado.setBounds(589, 255, 171, 30);
-        contentPane.add(comboEstado);
 
         lblUbicacion = new JLabel("Ubicación:");
         lblUbicacion.setForeground(Color.WHITE);
-        lblUbicacion.setBounds(439, 317, 128, 14);
+        lblUbicacion.setBounds(451, 345, 128, 14);
         contentPane.add(lblUbicacion);
 
         comboUbicacion = new JComboBox<>();
-        comboUbicacion.setBounds(589, 313, 171, 30);
+        comboUbicacion.setBounds(586, 337, 174, 30);
         contentPane.add(comboUbicacion);
+        
+        JButton btnAñadir = new JButton("Añadir");
+        btnAñadir.setBounds(451, 411, 89, 23);
+        contentPane.add(btnAñadir);
+        
+        
+        JLabel lblHora = new JLabel("Hora:");
+        lblHora.setForeground(Color.WHITE);
+        lblHora.setBounds(27, 317, 128, 14);
+        contentPane.add(lblHora);
+        
+        spinnerHora = new JSpinner(new SpinnerDateModel());
+        spinnerHora.setBounds(129, 314, 208, 20);
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinnerHora, "HH:mm:ss");
+        spinnerHora.setEditor(editor);
+        contentPane.add(spinnerHora);        
+        
+        lblError = new JLabel("");
+        lblError.setForeground(new Color(255, 0, 0));
+        lblError.setBounds(451, 455, 306, 14);
+        contentPane.add(lblError);
 
         // FONDO
         lblFondo = new JLabel("");
@@ -142,11 +153,34 @@ public class CrearReu extends JFrame {
         lblFondo.setIcon(new ImageIcon("fotos/backgroundGRANDE.png"));
         contentPane.add(lblFondo);
         
+        
+        btnAñadir.addActionListener(e -> {
+        	controlador.crearReunion();
+        });
+        
+        
         controlador.cargarCentros();
+        controlador.cargarAlumnos();
+        
     }
 
 
 	public JComboBox<String> getComboUbicacion() {return comboUbicacion;}
+	
+	public JComboBox<String> getComboMiembros() {return comboMiembros;}
 
-    
+	public JSpinner getSpinnerHora() {return spinnerHora;}
+
+	public JTextField getTxtNombre() {return txtNombre;}
+
+	public JTextArea getTaTema() {return taTema;}
+
+	public JDateChooser getDateChooser() {return dateChooser;}
+
+	public JComboBox<String> getComboAula() {return comboAula;}
+
+	public JLabel getLblError() {return lblError;}
+
+	
+	
 }

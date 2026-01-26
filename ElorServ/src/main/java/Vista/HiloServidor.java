@@ -6,13 +6,14 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.example.ElorServ.Centro;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import Controlador.Controlador;
 import modelo.Horarios;
@@ -21,11 +22,19 @@ import modelo.Users;
 
 public class HiloServidor extends Thread {
 
+    private static final Object TITULO = "titulo";
+    private static final Object ASUNTO = "asunto";
+    private static final Object AULA = "aula";
+    private static final Object IDCENTRO = "idCentro";
+    private static final Object ALUMNO = "idAlumno";
+    private static final Object FECHA = "fecha";
+    private static final String ESTADO = "estado";
     private Socket cliente;
     ArrayList<Users> listaUsuarios = new ArrayList<Users>();
     ArrayList<Users> listaAlumnos = new ArrayList<Users>();
     ArrayList<Reuniones> listaReunionesProfe = new ArrayList<Reuniones>();
     ArrayList<Reuniones> listaCentros = new ArrayList<Reuniones>();
+    ArrayList<Users> listaTodosAlumnos = new ArrayList<Users>();
 
     public HiloServidor(Socket cliente, String userEmail, String userContraseña) {
         this.cliente = cliente;
@@ -70,15 +79,14 @@ public class HiloServidor extends Thread {
                 }
 
                 if (correcto) {
-                    dos.writeUTF(idProfe);                    
+                    dos.writeUTF(idProfe);
                     menu(idProfe, dis, dos, controlador, listaUsuarios);
 
                 } else {
                     dos.writeUTF("-1");
                 }
-                
-            }
 
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,9 +95,9 @@ public class HiloServidor extends Thread {
 
     private void menu(String idProfe, DataInputStream dis, DataOutputStream dos, Controlador controlador, ArrayList<Users> listaUsuarios) {
 
-         if (idProfe != null) {
-     		listaAlumnos = controlador.obtenerAlumnos(Integer.parseInt(idProfe));
-         }
+        if (idProfe != null) {
+            listaAlumnos = controlador.obtenerAlumnos(Integer.parseInt(idProfe));
+        }
 
         int opcionInt = 0;
 
@@ -103,22 +111,18 @@ public class HiloServidor extends Thread {
                 switch (opcionInt) {
 
                     case 0:
-                    	cliente.close();
+                        cliente.close();
                         break;
 
                     case 1: {
-                        Gson gson = new Gson();
-                        String json = gson.toJson(listaUsuarios);
-                        dos.writeUTF(json);
-                        dos.flush();
+                        // listaUsuarios
+                        sendJson(dos, listaUsuarios);
                         break;
                     }
 
                     case 2: {
-                        Gson gson = new Gson();
-                        String json = gson.toJson(listaAlumnos);
-                        dos.writeUTF(json);
-                        dos.flush();
+                        // listaAlumnos
+                        sendJson(dos, listaAlumnos);
                         break;
                     }
 
@@ -137,16 +141,12 @@ public class HiloServidor extends Thread {
                             listaEnviar.add(mapa);
                         }
 
-                        Gson gson = new Gson();
-                        String json = gson.toJson(listaEnviar);
-
-                        dos.writeUTF(json);
-                        dos.flush();
+                        sendJson(dos, listaEnviar);
                         break;
                     }
 
                     case 4: {
-                         listaReunionesProfe =
+                        listaReunionesProfe =
                                 controlador.obtenerReunionesPorProfesor(Integer.parseInt(idProfe));
 
                         ArrayList<Map<String, Object>> listaEnviar = new ArrayList<>();
@@ -166,17 +166,13 @@ public class HiloServidor extends Thread {
                             listaEnviar.add(mapa);
                         }
 
-                        Gson gson = new Gson();
-                        String json = gson.toJson(listaEnviar);
-
-                        dos.writeUTF(json);
-                        dos.flush();
+                        sendJson(dos, listaEnviar);
                         break;
                     }
 
                     case 5: {
 
-                        int idOtroProfe = dis.readInt(); 
+                        int idOtroProfe = dis.readInt();
 
                         ArrayList<Horarios> listaHorarioOtro =
                                 controlador.obtenerHorarioProfe(idOtroProfe);
@@ -192,42 +188,79 @@ public class HiloServidor extends Thread {
                             listaEnviar.add(mapa);
                         }
 
-                        Gson gson = new Gson();
-                        String json = gson.toJson(listaEnviar);
-
-                        dos.writeUTF(json);
-                        dos.flush();
+                        sendJson(dos, listaEnviar);
                         break;
                     }
-                    case 6: {
-                    	int id = Integer.parseInt(dis.readUTF());
-                    	String estado = dis.readUTF();
-                    	for(Reuniones r : listaReunionesProfe) {
-                    		if(id ==  r.getIdReunion()) {
-                    			r.setEstado(estado); 
-                    			System.out.println(estado);
-                    			controlador.actualizarReunion(r.getIdReunion(), r.getEstado());
-                    		}
-                    	}
-                    	break;
-                    }
-                    case 7: {
-                        ArrayList<Centro> centros = controlador.leerJson(); 
 
-                        Set<String> centrosUnicos = new HashSet<>();
+                    case 6: {
+                        int id = Integer.parseInt(dis.readUTF());
+                        String estado = dis.readUTF();
+                        for (Reuniones r : listaReunionesProfe) {
+                            if (id == r.getIdReunion()) {
+                                r.setEstado(estado);
+                                controlador.actualizarReunion(r.getIdReunion(), r.getEstado());
+                            }
+                        }
+                        break;
+                    }
+
+                    case 7: {
+                        ArrayList<Centro> centros = controlador.leerJson();
+                        ArrayList<Map<String, Object>> centrosUnicos = new ArrayList<>();
 
                         for (Centro c : centros) {
                             if (c.getNOM() != null) {
-                                centrosUnicos.add(c.getNOM());
+                                Map<String, Object> datos = new HashMap<>();
+                                datos.put("NOM", c.getNOM());
+                                datos.put("CCEN", c.getCCEN());
+                                centrosUnicos.add(datos);
                             }
                         }
 
-                        Gson gson = new Gson();
-                        dos.writeUTF(gson.toJson(centrosUnicos));
-                        dos.flush();
+                        sendJson(dos, centrosUnicos);
+                        centros.clear();
+                        centrosUnicos.clear();
                         break;
                     }
 
+                    case 8: {
+                        listaTodosAlumnos = controlador.obtenerTodosAlumnos();
+                        sendJson(dos, listaTodosAlumnos);
+                        break;
+                    }
+
+                    case 9: {
+
+                        String json = dis.readUTF();
+
+                        Gson gson = new Gson();
+
+                        ArrayList<Map<String, Object>> lista =
+                                gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
+
+                        Reuniones reunion = new Reuniones();
+                        Users alumno = new Users();
+                        Users profesor = new Users();
+                        for (Map<String, Object> a : lista) {
+                            reunion.setTitulo(a.get(TITULO).toString());
+                            reunion.setAsunto(a.get(ASUNTO).toString());
+                            reunion.setAula(a.get(AULA).toString());
+                            int idAlumno = ((Double) a.get(ALUMNO)).intValue();
+                            alumno.setId(idAlumno);
+                            reunion.setUsersByAlumnoId(alumno);
+                            profesor.setId(Integer.parseInt(idProfe));
+                            reunion.setUsersByProfesorId(profesor);
+                            int idCentro = ((Double) a.get(IDCENTRO)).intValue();
+                            reunion.setIdCentro(String.valueOf(idCentro));
+                            reunion.setEstado(a.get(ESTADO).toString());
+                            String fecha = a.get(FECHA).toString();
+                            Timestamp fechats = Timestamp.valueOf(fecha);
+                            reunion.setFecha(fechats);
+                        }
+
+                        controlador.crearReunion(reunion);
+                        break;
+                    }
 
                 }
 
@@ -236,6 +269,16 @@ public class HiloServidor extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void sendJson(DataOutputStream dos, Object obj) throws IOException {
+        Gson gson = new Gson();
+        String json = gson.toJson(obj);
+        byte[] data = json.getBytes("UTF-8");
+
+        dos.writeInt(data.length);
+        dos.write(data);
+        dos.flush();
     }
 
     public static String cifrarUsuario(String texto) {
