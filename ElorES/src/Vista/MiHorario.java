@@ -1,9 +1,11 @@
 package Vista;
 
+import java.awt.Component;
 import java.awt.Image;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import Controlador.Controlador;
 
@@ -71,6 +73,11 @@ public class MiHorario extends JFrame {
 
         // CARGAR DATOS DESDE EL CONTROLADOR
         controlador.cargarHorario(idProfe);
+        
+        controlador.cargarHorario(idProfe);
+        ajustarAlturaFilas();
+        ajustarAnchoColumnas();
+        
 
         // FONDO
         JLabel lblFondo = new JLabel("");
@@ -79,6 +86,37 @@ public class MiHorario extends JFrame {
         contentPane.add(lblFondo);
     }
 
+    
+    public void ajustarAlturaFilas() {
+        for (int row = 0; row < table.getRowCount(); row++) {
+            int maxHeight = 30;
+
+            for (int column = 0; column < table.getColumnCount(); column++) {
+                TableCellRenderer renderer = table.getCellRenderer(row, column);
+                Component comp = table.prepareRenderer(renderer, row, column);
+                maxHeight = Math.max(comp.getPreferredSize().height + 6, maxHeight);
+            }
+
+            table.setRowHeight(row, maxHeight);
+        }
+    }
+
+    public void ajustarAnchoColumnas() {
+        for (int col = 0; col < table.getColumnCount(); col++) {
+            int maxWidth = 70;
+
+            for (int row = 0; row < table.getRowCount(); row++) {
+                TableCellRenderer renderer = table.getCellRenderer(row, col);
+                Component comp = table.prepareRenderer(renderer, row, col);
+                maxWidth = Math.max(comp.getPreferredSize().width + 15, maxWidth);
+            }
+
+            table.getColumnModel().getColumn(col).setPreferredWidth(maxWidth);
+        }
+    }
+
+
+    
     public DefaultTableModel getModelo() {
         return modelo;
     }

@@ -13,9 +13,9 @@ import modelo.*;
 public class Consultas {
 	
 	ArrayList<Users> listaUsuarios = new ArrayList<>();
-	ArrayList<Horarios> listaHorarios = new ArrayList<>();
+	ArrayList<Horarios> listaHorariosProfe = new ArrayList<>();
+	ArrayList<Horarios> listaHorariosAlumno = new ArrayList<>();
 	ArrayList<Reuniones> listaReuniones = new ArrayList<>();
-	ArrayList<Users> listaAlumnos = new ArrayList<>();
 
 	public static final String PROFESOR = "'profesor'";
 	public static final String ALUMNO = "'alumno'";
@@ -38,7 +38,6 @@ public class Consultas {
 			listaUsuarios.add(user);
 		}
 
-		   
 		return listaUsuarios;
 	}
 	
@@ -64,44 +63,39 @@ public class Consultas {
 
 
 	// ===================== HORARIOS =====================
-
-	public ArrayList<Horarios> obtenerHorariosProfesor() {
-		
-		listaHorarios.clear();  
-
-		Session session = HibernateUtil.getSessionFactory().openSession();
-		
-		String hql = "from Horarios where users.tipos.name = " + PROFESOR;
-		Query<Horarios> q = session.createQuery(hql, Horarios.class);
-		List<Horarios> filas = q.list();
-		
-		for (int i = 0; i < filas.size(); i++) {
-			Horarios horario = filas.get(i);
-			listaHorarios.add(horario);
+		public ArrayList<Horarios> obtenerHorariosProfesor() {
+			
+			listaHorariosProfe.clear(); 
+			Session session = HibernateUtil.getSessionFactory().openSession();
+			
+			String hql = "from Horarios where users.tipos.name = " + PROFESOR;
+			Query<Horarios> q = session.createQuery(hql, Horarios.class);
+			List<Horarios> filas = q.list();
+			
+			for (int i = 0; i < filas.size(); i++) {
+				Horarios horario = filas.get(i);
+				listaHorariosProfe.add(horario);
+			}
+			  
+			return listaHorariosProfe;
 		}
-
-		   
-		return listaHorarios;
-	}
-	
-	public ArrayList<Horarios> obtenerHorariosAlumno() {
 		
-		listaHorarios.clear();  
-
-		Session session = HibernateUtil.getSessionFactory().openSession();
-		
-		String hql = "from Horarios where users.tipos.name = " + ALUMNO;
-		Query<Horarios> q = session.createQuery(hql, Horarios.class);
-		List<Horarios> filas = q.list();
-		
-		for (int i = 0; i < filas.size(); i++) {
-			Horarios horario = filas.get(i);
-			listaHorarios.add(horario);
+		public ArrayList<Horarios> obtenerHorariosAlumno() {
+			
+			listaHorariosAlumno.clear(); 
+			Session session = HibernateUtil.getSessionFactory().openSession();
+			
+			String hql = "select h from Horarios h join h.modulos m join m.ciclos c join c.matriculacioneses mat join mat.users u where u.tipos.name = " +ALUMNO;
+			Query<Horarios> q = session.createQuery(hql, Horarios.class);
+			List<Horarios> filas = q.list();
+			
+			for (int i = 0; i < filas.size(); i++) {
+				Horarios horario = filas.get(i);
+				listaHorariosAlumno.add(horario);
+			}
+			  
+			return listaHorariosAlumno;
 		}
-
-		   
-		return listaHorarios;
-	}
 
 
 	// ===================== REUNIONES =====================
@@ -125,13 +119,13 @@ public class Consultas {
 		return listaReuniones;
 	}
 	
-	public ArrayList<Reuniones> obtenerReunionesPorProfesor(int profesorId) {
+	public ArrayList<Reuniones> obtenerReunionesPorProfesor(String idProfe) {
 		
 		listaReuniones.clear();  
 
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		
-		String hql = "from Reuniones where usersByProfesorId.id = " + profesorId;
+		String hql = "from Reuniones where usersByProfesorId = " + idProfe;
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
 		List<Reuniones> filas = q.list();
 		
@@ -147,69 +141,67 @@ public class Consultas {
 
 	// ===================== ALUMNOS =====================
 
-	public ArrayList<Users> obtenerAlumnos(int profesorId) {
-		
-		listaAlumnos.clear();  
+	public ArrayList<Users> obtenerAlumnos(Users profesor) {
+	    ArrayList<Users> listaAlumnos = new ArrayList<>();
+	    Session session = HibernateUtil.getSessionFactory().openSession();
 
-		Session session = HibernateUtil.getSessionFactory().openSession();
-	    
-		try {
-			String hql = "select distinct r.usersByAlumnoId "
-					   + "from Users profesor "
-					   + "join profesor.reunionesesForProfesorId r "
-					   + "where profesor.id = :idProfesor";
-			
-			Query<Users> query = session.createQuery(hql, Users.class);
-			query.setParameter("idProfesor", profesorId); 
-			listaAlumnos.addAll(query.list());
-		    
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	    try {
+	    	  String hql =
+	    	            "select distinct m.users " +
+	    	            "from Users p " +
+	    	            "join p.horarioses h " +
+	    	            "join h.modulos mo " +
+	    	            "join mo.ciclos c " +
+	    	            "join c.matriculacioneses m " +
+	    	            "where p = :prof";
+	        Query<Users> query = session.createQuery(hql, Users.class);
+	        query.setParameter("prof", profesor);  
 
-		   
-		return listaAlumnos;
+	        listaAlumnos.addAll(query.list());
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return listaAlumnos;
 	}
 	
 	public ArrayList<Users> obtenerTodosAlumnos() {
 		
-		listaAlumnos.clear();  
-		
+		List<Users> lista = new ArrayList<Users>();
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		    
 		try {
 			String hql = "from Users u where u.tipos.name = " + ALUMNO;
-			Query<Users> query = session.createQuery(hql, Users.class);
-			listaAlumnos.addAll(query.list());
+			lista = session.createQuery(hql, Users.class).list();
 			    
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		   
-		return listaAlumnos;
+		return (ArrayList<Users>) lista;
 	}
 	
 	
 	// ===================== HORARIO PROFE =====================
 
-	public ArrayList<Horarios> obtenerHorarioProfe(int profesorId) {
-		
-		ArrayList<Horarios> listaHorarios = new ArrayList<>();
-		Session session = HibernateUtil.getSessionFactory().openSession();
-		
-		try {
-			String hql = "from Horarios h where h.users.id = :idProfesor";
-			Query<Horarios> query = session.createQuery(hql, Horarios.class);
-			query.setParameter("idProfesor", profesorId); 
-			listaHorarios.addAll(query.list());
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		   
-		return listaHorarios;
+	public ArrayList<Horarios> obtenerHorarioProfe(Users profe) {
+	    ArrayList<Horarios> listaHorarios = new ArrayList<>();
+	    Session session = HibernateUtil.getSessionFactory().openSession();
+	    
+	    try {
+	        Users profeGestionado = session.get(Users.class, profe.getId());
+
+	        String hql = "from Horarios h where h.users = :profe";
+	        Query<Horarios> query = session.createQuery(hql, Horarios.class);
+	        query.setParameter("profe", profeGestionado); 
+	        listaHorarios.addAll(query.list());
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return listaHorarios;
 	}
 
 
@@ -234,16 +226,16 @@ public class Consultas {
 
 	// ===================== UPDATE =====================
 
-	public void actualizarReunion(Integer idReunion, String estado) {
+	public void actualizarReunion(Reuniones reunion, String estado) {
 
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		Transaction tx = session.beginTransaction();
 	    
-		String hql = "UPDATE Reuniones r SET r.estado = :estado WHERE r.idReunion = :id";
+		String hql = "UPDATE Reuniones r SET r.estado = :estado WHERE r = :reunion";
 	    
 		MutationQuery query = session.createMutationQuery(hql);
 		query.setParameter("estado", estado);
-		query.setParameter("id", idReunion);
+		query.setParameter("reunion", reunion);
 
 		query.executeUpdate();
 		tx.commit();

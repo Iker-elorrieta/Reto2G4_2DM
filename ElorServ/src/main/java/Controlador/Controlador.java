@@ -16,21 +16,21 @@ public class Controlador {
 		 return gestor.obtenerProfesores();
 	}
 
-	public ArrayList<Users> obtenerAlumnos(int profesorId) {
+	public ArrayList<Users> obtenerAlumnos(Users profesor) {
 		
-		return gestor.obtenerAlumnos(profesorId);
+		return gestor.obtenerAlumnos(profesor);
 	}
 	
 	public ArrayList<Users> obtenerTodosAlumnos() {
 		return gestor.obtenerTodosAlumnos();
 	}
 	
-	public ArrayList<Horarios> obtenerHorarioProfe(int profesorId) {
-		return gestor.obtenerHorarioProfe(profesorId);
+	public ArrayList<Horarios> obtenerHorarioProfe(Users profe) {
+		return gestor.obtenerHorarioProfe(profe);
 	}
 	
-	public ArrayList<Reuniones> obtenerReunionesPorProfesor(int profesorId) {
-		return gestor.obtenerReunionesPorProfesor(profesorId);
+	public ArrayList<Reuniones> obtenerReunionesPorProfesor(String idProfe) {
+		return gestor.obtenerReunionesPorProfesor(idProfe);
 	}
 	
 	public String obtenerNombreCentroPorId(String idCentro) {
@@ -48,8 +48,8 @@ public class Controlador {
 		return gestor.obtenerHorarios();
 	}
 
-	public void actualizarReunion(Integer idCentro, String Estado) {
-		gestor.actualizarReunion(idCentro, Estado);
+	public void actualizarReunion(Reuniones reunion, String Estado) {
+		gestor.actualizarReunion(reunion, Estado);
 		
 	}
 

@@ -11,21 +11,17 @@ import modelo.*;
 
 @RestController
 public class ControladorHorarios {
-
+	
 	Consultas consultas = new Consultas();
-	private ArrayList<Horarios> profesores = consultas.obtenerHorariosProfesor();
-	private ArrayList<Horarios> alumnos = consultas.obtenerHorariosAlumno();
-
+	
 	@GetMapping("/horarios/profesores")
 	public ArrayList<Horarios> getProfesores() {
-		
-		return profesores;
+		return consultas.obtenerHorariosProfesor();
 	}
 	
 	@GetMapping("/horarios/alumnos")
 	public ArrayList<Horarios> getAlumnos() {
 		
-		return alumnos;
+		return consultas.obtenerHorariosAlumno();
 	}
-
 }

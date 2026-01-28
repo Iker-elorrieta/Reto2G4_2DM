@@ -1,9 +1,10 @@
 package Controlador;
 
 import java.awt.Color;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -24,8 +25,8 @@ import javax.swing.table.DefaultTableModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import Modelo.Centro;
-import Modelo.Users;
+import modelo.Centro;
+import modelo.Users;
 
 public class Controlador {
 
@@ -56,9 +57,9 @@ public class Controlador {
     //  CONEXIÓN ÚNICA
     // ---------------------------
     public Socket cliente;
-    private DataInputStream dis;
-    private DataOutputStream dos;
-    private Map<String, Integer> mapaProfesores = new HashMap<>();
+    private ObjectOutputStream oos;
+    private ObjectInputStream ois;
+    private Map<String, Users> mapaProfesores = new HashMap<>();
     private Map<String, String> estadosReuniones = new HashMap<>();
     private ArrayList<Centro> centros = new ArrayList<Centro>();
     private ArrayList<Users> usuarios = new ArrayList<Users>();
@@ -89,8 +90,8 @@ public class Controlador {
         try {
             if (cliente == null) {
                 cliente = new Socket("localhost", 5000);
-                dis = new DataInputStream(cliente.getInputStream());
-                dos = new DataOutputStream(cliente.getOutputStream());
+                oos = new ObjectOutputStream(cliente.getOutputStream());
+                ois = new ObjectInputStream(cliente.getInputStream());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -119,10 +120,10 @@ public class Controlador {
             String correoHash = cifrar(correo);
             String passHash = cifrar(pass);
 
-            dos.writeUTF(correoHash);
-            dos.writeUTF(passHash);
+            oos.writeObject(correoHash);
+            oos.writeObject(passHash);
 
-            String respuesta = dis.readUTF();
+            String respuesta = ois.readObject().toString();
 
             if (respuesta.equals("-1")) {
                 login.getLblError().setText("Correo o contraseña incorrectos");
@@ -135,7 +136,11 @@ public class Controlador {
             e.printStackTrace();
             login.getLblError().setText("Error de conexión");
             return -1;
-        }
+        } catch (ClassNotFoundException e) {
+        	e.printStackTrace();
+            login.getLblError().setText("Error de conexión");
+            return -1;
+		}
     }
 
     // ---------------------------
@@ -154,9 +159,9 @@ public class Controlador {
     //  LECTURA JSON GRANDE
     // ---------------------------
     private String readJson() throws IOException {
-        int length = dis.readInt();
+        int length = ois.readInt();
         byte[] data = new byte[length];
-        dis.readFully(data);
+        ois.readFully(data);
         return new String(data, "UTF-8");
     }
 
@@ -166,8 +171,8 @@ public class Controlador {
     public void cargarPerfil(int idProfe) {
 
         try {
-            dos.writeUTF("1");
-            dos.flush();
+            oos.writeObject("1");
+            oos.flush();
 
             String json = readJson();
 
@@ -200,9 +205,10 @@ public class Controlador {
     public void cargarHorario(int idProfe) {
 
         try {
-            dos.writeUTF("3");
-            dos.flush();
+            oos.writeObject("3");
+            oos.flush();
 
+            String informacion = "";
             String json = readJson();
 
             Gson gson = new Gson();
@@ -221,9 +227,15 @@ public class Controlador {
                     case "viernes" -> 5;
                     default -> -1;
                 };
+                
+                if(h.get(AULA) != null) {
+                	informacion = "<html>" + h.get(MODULOS) + "<br>" + h.get(AULA) + "</html>";
+                } else {
+                	informacion = "<html>" + h.get(MODULOS) + "<br>Sin aula asignada</html>";
+                }
 
                 if (col != -1) {
-                    miHorario.getModelo().setValueAt(h.get(MODULOS), fila, col);
+                    miHorario.getModelo().setValueAt(informacion, fila, col);
                 }
             }
 
@@ -237,8 +249,8 @@ public class Controlador {
     // ---------------------------
     public void otrosHorarios() {
         try {
-            dos.writeUTF("1");
-            dos.flush();
+            oos.writeObject("1");
+            oos.flush();
 
             String json = readJson();
 
@@ -251,11 +263,39 @@ public class Controlador {
 
             for (Map<String, Object> h : lista) {
 
-                String nombre = h.get(NOMBRE).toString();
-                int id = ((Double) h.get(ID)).intValue();
+                Users user = new Users();
 
-                mapaProfesores.put(nombre, id);
-                otrosHorarios.getCbProfesores().addItem(nombre);
+                if (h.get("id") != null) {
+                    user.setId(((Double) h.get("id")).intValue()); 
+                }
+                if (h.get("nombre") != null) {
+                    user.setNombre(h.get("nombre").toString());
+                }
+                if (h.get("apellidos") != null) {
+                    user.setApellidos(h.get("apellidos").toString());
+                }
+                if (h.get("email") != null) {
+                    user.setEmail(h.get("email").toString());
+                }
+                if (h.get("username") != null) {
+                    user.setUsername(h.get("username").toString());
+                }
+                if (h.get("dni") != null) {
+                    user.setDni(h.get("dni").toString());
+                }
+                if (h.get("telefono1") != null) {
+                    user.setTelefono1(h.get("telefono1").toString());
+                }
+                if (h.get("telefono2") != null) {
+                    user.setTelefono2(h.get("telefono2").toString());
+                }
+                if (h.get("direccion") != null) {
+                    user.setDireccion(h.get("direccion").toString());
+                }
+
+                String nombreVisible = user.getNombre() + " " + user.getApellidos();
+                mapaProfesores.put(nombreVisible, user); 
+                otrosHorarios.getCbProfesores().addItem(nombreVisible);
             }
 
         } catch (IOException e) {
@@ -263,18 +303,19 @@ public class Controlador {
         }
     }
 
-    public void cargarHorarioDeProfesor(String nombreProfe) {
 
-        int idProfe = mapaProfesores.get(nombreProfe);
+    public void cargarHorarioDeProfesor(Users profesor) {
+
         DefaultTableModel model = otrosHorarios.getModelo();
 
         try {
-            dos.writeUTF("5");
-            dos.writeInt(idProfe);
-            dos.flush();
+            oos.writeObject("5");
+            oos.writeObject(profesor);
+            oos.flush();
 
+            String informacion;
             String json = readJson();
-
+            
             Gson gson = new Gson();
             ArrayList<Map<String, Object>> lista =
                     gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
@@ -299,8 +340,14 @@ public class Controlador {
                     default -> -1;
                 };
 
+                if(h.get(AULA) != null) {
+                	informacion = "<html>" + h.get(MODULOS) + "<br>" + h.get(AULA) + "</html>";
+                } else {
+                	informacion = "<html>" + h.get(MODULOS) + "<br>Sin aula asignada</html>";
+                }
+
                 if (col != -1) {
-                    model.setValueAt(h.get(MODULOS), fila, col);
+                    otrosHorarios.getModelo().setValueAt(informacion, fila, col);
                 }
             }
 
@@ -315,8 +362,8 @@ public class Controlador {
     public void cargarAlumnos(int idProfe) {
 
         try {
-            dos.writeUTF("2");
-            dos.flush();
+            oos.writeObject("2");
+            oos.flush();
 
             String json = readJson();
 
@@ -348,8 +395,8 @@ public class Controlador {
     public void cargarDetalleAlumno(int idAlumno) {
 
         try {
-            dos.writeUTF("2");
-            dos.flush();
+            oos.writeObject("2");
+            oos.flush();
 
             String json = readJson();
 
@@ -384,11 +431,12 @@ public class Controlador {
     public void cargarHorarioReuniones() {
 
         try {
-            dos.writeUTF("3");
-            dos.flush();
+            oos.writeObject("3");
+            oos.flush();
 
             String json = readJson();
-
+            String informacion; 
+            
             Gson gson = new Gson();
             ArrayList<Map<String, Object>> lista =
                     gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
@@ -405,9 +453,15 @@ public class Controlador {
                     case "viernes" -> 5;
                     default -> -1;
                 };
+                
+                if(h.get(AULA) != null) {
+                	informacion = "<html>" + h.get(MODULOS) + "<br>" + h.get(AULA) + "</html>";
+                } else {
+                	informacion = "<html>" + h.get(MODULOS) + "<br>Sin aula asignada</html>";
+                }
 
                 if (col != -1) {
-                    consultarReu.getModelo().setValueAt(h.get(MODULOS), fila, col);
+                    consultarReu.getModelo().setValueAt(informacion, fila, col);
                 }
             }
 
@@ -418,8 +472,8 @@ public class Controlador {
 
     public void CargarReuniones() {
         try {
-            dos.writeUTF("4");
-            dos.flush();
+            oos.writeObject("4");
+            oos.flush();
             String json = readJson();
 
             Gson gson = new Gson();
@@ -492,8 +546,8 @@ public class Controlador {
 
     public void cargarPendientes() {
         try {
-            dos.writeUTF("4");
-            dos.flush();
+            oos.writeObject("4");
+            oos.flush();
             String json = readJson();
 
             Gson gson = new Gson();
@@ -524,10 +578,10 @@ public class Controlador {
 
     public void cambiarEstadoReunion(int idReu, String nuevoEstado) {
         try {
-            dos.writeUTF("6");
-            dos.writeUTF(String.valueOf(idReu));
-            dos.writeUTF(nuevoEstado);
-            dos.flush();
+            oos.writeObject("6");
+            oos.writeObject(String.valueOf(idReu));
+            oos.writeObject(nuevoEstado);
+            oos.flush();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -543,8 +597,8 @@ public class Controlador {
             centros.clear();
             crearReuniones.getComboUbicacion().removeAllItems();
 
-            dos.writeUTF("7");
-            dos.flush();
+            oos.writeObject("7");
+            oos.flush();
 
             String json = readJson();
             Gson gson = new Gson();
@@ -568,8 +622,8 @@ public class Controlador {
             usuarios.clear();
             crearReuniones.getComboMiembros().removeAllItems();
 
-            dos.writeUTF("8");
-            dos.flush();
+            oos.writeObject("8");
+            oos.flush();
 
             String json = readJson();
             Gson gson = new Gson();
@@ -590,8 +644,8 @@ public class Controlador {
 
     public String consultarEstado(String fechaStr) {
         try {
-            dos.writeUTF("4");
-            dos.flush();
+            oos.writeObject("4");
+            oos.flush();
 
             String json = readJson();
             Gson gson = new Gson();
@@ -689,11 +743,11 @@ public class Controlador {
             listaEnviar.add(mapa);
 
             try {
-                dos.writeUTF("9");
-                dos.flush();
+                oos.writeObject("9");
+                oos.flush();
                 Gson gson = new Gson();
-                dos.writeUTF(gson.toJson(listaEnviar));
-                dos.flush();
+                oos.writeObject(gson.toJson(listaEnviar));
+                oos.flush();
 
                 nuevaReunion.clear();
                 listaEnviar.clear();
@@ -714,11 +768,11 @@ public class Controlador {
 
     public void cerrarConexion() {
         try {
-            dos.writeUTF("0");
-            dos.flush();
+            oos.writeObject("0");
+            oos.flush();
             cliente.close();
-            dis.close();
-            dos.close();
+            ois.close();
+            oos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -739,5 +793,6 @@ public class Controlador {
     public void setGestionPendientes(Vista.GestionPendientes pendientes) {this.pendientes = pendientes;}
     public void setCrearReu(Vista.CrearReu crearReuniones) {this.crearReuniones = crearReuniones;}
     public void setGestionReuniones(Vista.GestionReuniones gestionReuniones) {this.gestionReuniones = gestionReuniones;}
+    public Map<String, Users> getMapaProfesores() {return mapaProfesores;}
 
 }

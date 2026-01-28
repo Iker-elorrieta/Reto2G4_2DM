@@ -1,8 +1,9 @@
 package Vista;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -52,18 +53,20 @@ public class HiloServidor extends Thread {
         String idProfe = null;
         Controlador controlador = new Controlador();
         listaUsuarios = controlador.obtenerProfesores();
-
+        Users usuario = new Users();
+        
         try {
 
-            DataInputStream dis = new DataInputStream(cliente.getInputStream());
-            DataOutputStream dos = new DataOutputStream(cliente.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(cliente.getInputStream());
+            ObjectOutputStream oos = new ObjectOutputStream(cliente.getOutputStream());
+
 
             boolean correcto = false;
 
             while (!correcto) {
 
-                String correo = dis.readUTF();
-                String contraseña = dis.readUTF();
+                String correo = ois.readObject().toString();
+                String contraseña = ois.readObject().toString();
 
                 correcto = false;
 
@@ -74,29 +77,30 @@ public class HiloServidor extends Thread {
 
                     if (emailCifrado.equals(correo) && passCifrada.equals(contraseña)) {
                         idProfe = user.getId().toString();
+                        usuario = user;
                         correcto = true;
                     }
                 }
 
                 if (correcto) {
-                    dos.writeUTF(idProfe);
-                    menu(idProfe, dis, dos, controlador, listaUsuarios);
+                    oos.writeObject(idProfe);
+                    menu(idProfe, usuario, ois, oos, controlador, listaUsuarios);
 
                 } else {
-                    dos.writeUTF("-1");
+                    oos.writeObject("-1");
                 }
 
             }
 
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    private void menu(String idProfe, DataInputStream dis, DataOutputStream dos, Controlador controlador, ArrayList<Users> listaUsuarios) {
+    private void menu(String idProfe, Users usuario, ObjectInputStream ois,  ObjectOutputStream oos, Controlador controlador, ArrayList<Users> listaUsuarios) {
 
         if (idProfe != null) {
-            listaAlumnos = controlador.obtenerAlumnos(Integer.parseInt(idProfe));
+            listaAlumnos = controlador.obtenerAlumnos(usuario);
         }
 
         int opcionInt = 0;
@@ -105,7 +109,7 @@ public class HiloServidor extends Thread {
 
             do {
 
-                String opcion = dis.readUTF();
+                String opcion = ois.readObject().toString();
                 opcionInt = Integer.parseInt(opcion);
 
                 switch (opcionInt) {
@@ -116,19 +120,19 @@ public class HiloServidor extends Thread {
 
                     case 1: {
                         // listaUsuarios
-                        sendJson(dos, listaUsuarios);
+                        sendJson(oos, listaUsuarios);
                         break;
                     }
 
                     case 2: {
                         // listaAlumnos
-                        sendJson(dos, listaAlumnos);
+                        sendJson(oos, listaAlumnos);
                         break;
                     }
 
                     case 3: {
                         ArrayList<Horarios> listaHorarioProfe =
-                                controlador.obtenerHorarioProfe(Integer.parseInt(idProfe));
+                                controlador.obtenerHorarioProfe(usuario);
 
                         ArrayList<Map<String, Object>> listaEnviar = new ArrayList<>();
 
@@ -136,18 +140,19 @@ public class HiloServidor extends Thread {
                             Map<String, Object> mapa = new java.util.HashMap<>();
                             mapa.put("hora", h.getHora());
                             mapa.put("dia", h.getDia());
+                            mapa.put("aula", h.getAula());
                             mapa.put("modulos",
                                     (h.getModulos() != null) ? h.getModulos().getNombre() : "");
                             listaEnviar.add(mapa);
                         }
 
-                        sendJson(dos, listaEnviar);
+                        sendJson(oos, listaEnviar);
                         break;
                     }
 
                     case 4: {
                         listaReunionesProfe =
-                                controlador.obtenerReunionesPorProfesor(Integer.parseInt(idProfe));
+                                controlador.obtenerReunionesPorProfesor(idProfe);
 
                         ArrayList<Map<String, Object>> listaEnviar = new ArrayList<>();
 
@@ -166,16 +171,16 @@ public class HiloServidor extends Thread {
                             listaEnviar.add(mapa);
                         }
 
-                        sendJson(dos, listaEnviar);
+                        sendJson(oos, listaEnviar);
                         break;
                     }
 
                     case 5: {
 
-                        int idOtroProfe = dis.readInt();
+                        Users otroProfe = (Users) ois.readObject();
 
                         ArrayList<Horarios> listaHorarioOtro =
-                                controlador.obtenerHorarioProfe(idOtroProfe);
+                                controlador.obtenerHorarioProfe(otroProfe);
 
                         ArrayList<Map<String, Object>> listaEnviar = new ArrayList<>();
 
@@ -183,22 +188,23 @@ public class HiloServidor extends Thread {
                             Map<String, Object> mapa = new java.util.HashMap<>();
                             mapa.put("hora", h.getHora());
                             mapa.put("dia", h.getDia());
+                            mapa.put("aula", h.getAula());
                             mapa.put("modulos",
                                     (h.getModulos() != null) ? h.getModulos().getNombre() : "");
                             listaEnviar.add(mapa);
                         }
 
-                        sendJson(dos, listaEnviar);
+                        sendJson(oos, listaEnviar);
                         break;
                     }
 
                     case 6: {
-                        int id = Integer.parseInt(dis.readUTF());
-                        String estado = dis.readUTF();
+                        int id = Integer.parseInt(ois.readObject().toString());
+                        String estado = ois.readObject().toString();
                         for (Reuniones r : listaReunionesProfe) {
                             if (id == r.getIdReunion()) {
                                 r.setEstado(estado);
-                                controlador.actualizarReunion(r.getIdReunion(), r.getEstado());
+                                controlador.actualizarReunion(r, r.getEstado());
                             }
                         }
                         break;
@@ -217,7 +223,7 @@ public class HiloServidor extends Thread {
                             }
                         }
 
-                        sendJson(dos, centrosUnicos);
+                        sendJson(oos, centrosUnicos);
                         centros.clear();
                         centrosUnicos.clear();
                         break;
@@ -225,13 +231,13 @@ public class HiloServidor extends Thread {
 
                     case 8: {
                         listaTodosAlumnos = controlador.obtenerTodosAlumnos();
-                        sendJson(dos, listaTodosAlumnos);
+                        sendJson(oos, listaTodosAlumnos);
                         break;
                     }
 
                     case 9: {
 
-                        String json = dis.readUTF();
+                        String json = ois.readObject().toString();
 
                         Gson gson = new Gson();
 
@@ -266,19 +272,19 @@ public class HiloServidor extends Thread {
 
             } while (opcionInt != 0);
 
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    private void sendJson(DataOutputStream dos, Object obj) throws IOException {
+    private void sendJson(ObjectOutputStream oos, Object obj) throws IOException {
         Gson gson = new Gson();
         String json = gson.toJson(obj);
         byte[] data = json.getBytes("UTF-8");
 
-        dos.writeInt(data.length);
-        dos.write(data);
-        dos.flush();
+        oos.writeInt(data.length);
+        oos.write(data);
+        oos.flush();
     }
 
     public static String cifrarUsuario(String texto) {
