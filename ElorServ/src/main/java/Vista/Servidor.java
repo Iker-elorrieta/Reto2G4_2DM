@@ -4,37 +4,31 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import Controlador.Controlador;
+
+@Component
 public class Servidor extends Thread {
 
-	static ServerSocket servidor;
-	
-	public void run() {
+    private final Controlador controlador;
 
-		try {
-			 servidor = new ServerSocket(5000);
-				
-			while (true) {
-				Socket cliente = servidor.accept();
-				HiloServidor hilo = new HiloServidor(cliente);
-				hilo.start();
-			}
-													
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
-		try {
-			servidor.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+    @Autowired
+    public Servidor(Controlador controlador) {
+        this.controlador = controlador;
+    }
 
-		
-	}
-	
-	
-	
-
+    @Override
+    public void run() {
+        try (ServerSocket serverSocket = new ServerSocket(5000)) {
+            while (true) {
+                Socket cliente = serverSocket.accept();
+                HiloServidor hilo = new HiloServidor(cliente, controlador);
+                hilo.start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
 
+
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 public class LeerJson {
 	
 	private ArrayList<Centro> centros = new ArrayList<Centro>();
+	
+	
 	
 	public void obtenerJson() { 
 		Gson gson = new Gson(); 
@@ -31,5 +34,6 @@ public class LeerJson {
 		obtenerJson();
 		return centros;
 	}
+
 
 }

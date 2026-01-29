@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import org.springframework.web.bind.annotation.*;
 
 import Controlador.Consultas;
+import Controlador.HibernateUtil;
+import jakarta.annotation.PostConstruct;
 import modelo.Users;
 
 
@@ -12,9 +14,23 @@ import modelo.Users;
 @RequestMapping("/users")
 public class ControladorUsuarios {
 	
-	Consultas consultas = new Consultas();
-	private ArrayList<Users> usuarios = consultas.obtenerUsuarios();
+
+	private Consultas consultas; 
+	private ArrayList<Users> usuarios;
 	private int siguienteId = 17; 
+	
+	private final HibernateUtil hibernateUtil;
+
+	public ControladorUsuarios(HibernateUtil hibernateUtil, Consultas consultas) {
+		this.hibernateUtil = hibernateUtil;
+		this.consultas = consultas;
+	}
+	
+
+    @PostConstruct
+    public void init() {
+        this.usuarios = consultas.obtenerUsuarios();
+    }
 	
 	@GetMapping
 	public ArrayList<Users> getUsuarios() {
@@ -75,6 +91,10 @@ public class ControladorUsuarios {
 
 	    usuarios.remove(usuarioAEliminar);
 	    return "Usuario " + usuarioAEliminar.getNombre() + " eliminado!";
+	}
+
+	public HibernateUtil getHibernateUtil() {
+		return hibernateUtil;
 	}
 
 	

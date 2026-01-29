@@ -12,8 +12,8 @@ public class Ciclos implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private String nombre;
-	private Set<Modulos> moduloses = new HashSet<Modulos>(0);
-	private Set<Matriculaciones> matriculacioneses = new HashSet<Matriculaciones>(0);
+	private transient Set<Modulos> moduloses = new HashSet<Modulos>(0);
+	private transient Set<Matriculaciones> matriculacioneses = new HashSet<Matriculaciones>(0);
 
 	public Ciclos() {
 	}

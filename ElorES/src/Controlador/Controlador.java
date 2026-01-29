@@ -1,7 +1,7 @@
 package Controlador;
 
-import java.awt.Color;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -46,12 +46,13 @@ public class Controlador {
     private static final String MODULOS = "modulos";
     private static final String ESTADO = "estado";
     private static final String FECHA = "fecha";
-    private static final String PROFESOR = "profesor";
-    private static final String ALUMNO = "alumno";
-    private static final String CENTRO = "centro";
-    private static final String TITULO = "titulo";
-    private static final String ASUNTO = "asunto";
     private static final String AULA = "aula";
+	private static final Object IDREUNION = "idReunion";
+	private static final Object USERSBYALUMNOID = "usersByAlumnoId";
+	private static final Object IDCENTRO = "idCentro";
+	private static final Object USERSBYPROFESORID = "usersByProfesorId";
+	private static final Object PENDIENTE = "pendiente";
+	private static final Object CONFLICTO = "conflicto";
 
     // ---------------------------
     //  CONEXIÓN ÚNICA
@@ -59,6 +60,8 @@ public class Controlador {
     public Socket cliente;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
+    private DataOutputStream dos;
+
     private Map<String, Users> mapaProfesores = new HashMap<>();
     private Map<String, String> estadosReuniones = new HashMap<>();
     private ArrayList<Centro> centros = new ArrayList<Centro>();
@@ -78,6 +81,10 @@ public class Controlador {
     private Vista.CrearReu crearReuniones;
     private Vista.GestionReuniones gestionReuniones;
 
+    
+    private static int SOCKET_PORT = Integer.parseInt(System.getenv().getOrDefault("SOCKET_PORT", "5000"));
+
+	private static String SOCKET_HOST = System.getenv().getOrDefault("SOCKET_HOST", "localhost");
     // ---------------------------
     //  CONSTRUCTOR
     // ---------------------------
@@ -89,10 +96,11 @@ public class Controlador {
     public void conectar() {
         try {
             if (cliente == null) {
-                cliente = new Socket("localhost", 5000);
+                cliente = new Socket(SOCKET_HOST, SOCKET_PORT);
                 oos = new ObjectOutputStream(cliente.getOutputStream());
                 ois = new ObjectInputStream(cliente.getInputStream());
-            }
+                dos = new DataOutputStream(cliente.getOutputStream());
+                }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -164,6 +172,8 @@ public class Controlador {
         ois.readFully(data);
         return new String(data, "UTF-8");
     }
+    
+
 
     // ---------------------------
     //  PERFIL
@@ -171,8 +181,8 @@ public class Controlador {
     public void cargarPerfil(int idProfe) {
 
         try {
-            oos.writeObject("1");
-            oos.flush();
+            dos.writeUTF("1");
+            dos.flush();
 
             String json = readJson();
 
@@ -205,8 +215,8 @@ public class Controlador {
     public void cargarHorario(int idProfe) {
 
         try {
-            oos.writeObject("3");
-            oos.flush();
+            dos.writeUTF("3");
+            dos.flush();
 
             String informacion = "";
             String json = readJson();
@@ -249,8 +259,8 @@ public class Controlador {
     // ---------------------------
     public void otrosHorarios() {
         try {
-            oos.writeObject("1");
-            oos.flush();
+            dos.writeUTF("1");
+            dos.flush();
 
             String json = readJson();
 
@@ -309,7 +319,8 @@ public class Controlador {
         DefaultTableModel model = otrosHorarios.getModelo();
 
         try {
-            oos.writeObject("5");
+            dos.writeUTF("5");
+            dos.flush();
             oos.writeObject(profesor);
             oos.flush();
 
@@ -362,8 +373,8 @@ public class Controlador {
     public void cargarAlumnos(int idProfe) {
 
         try {
-            oos.writeObject("2");
-            oos.flush();
+            dos.writeUTF("2");
+            dos.flush();
 
             String json = readJson();
 
@@ -395,8 +406,8 @@ public class Controlador {
     public void cargarDetalleAlumno(int idAlumno) {
 
         try {
-            oos.writeObject("2");
-            oos.flush();
+            dos.writeUTF("2");
+            dos.flush();
 
             String json = readJson();
 
@@ -431,8 +442,8 @@ public class Controlador {
     public void cargarHorarioReuniones() {
 
         try {
-            oos.writeObject("3");
-            oos.flush();
+            dos.writeUTF("3");
+            dos.flush();
 
             String json = readJson();
             String informacion; 
@@ -472,8 +483,9 @@ public class Controlador {
 
     public void CargarReuniones() {
         try {
-            oos.writeObject("4");
-            oos.flush();
+            dos.writeUTF("4");
+            dos.flush();
+
             String json = readJson();
 
             Gson gson = new Gson();
@@ -482,55 +494,97 @@ public class Controlador {
 
             for (Map<String, Object> h : lista) {
 
-                if (h.get(ID) != null) {
+                // -----------------------------
+                // 1. ID DE LA REUNIÓN
+                // -----------------------------
+                int idReu = ((Double) h.get(IDREUNION)).intValue();
 
-                    int idReu = ((Double) h.get(ID)).intValue();
-                    String fechaStr = h.get(FECHA).toString();
-                    String estado = h.get(ESTADO).toString();
+                // -----------------------------
+                // 2. FECHA
+                // -----------------------------
+                String fechaStr = h.get(FECHA).toString();
 
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-                    LocalDateTime fecha = LocalDateTime.parse(fechaStr, formatter);
+                fechaStr = fechaStr.replace("\u202F", " ");
 
-                    Locale localeES = Locale.forLanguageTag("es-ES");
+                DateTimeFormatter formatoSQL =
+                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.S]");
 
-                    int hora = fecha.getHour();
-                    int fila = convertirHoraAFila(hora);
+                DateTimeFormatter formatoIngles =
+                     DateTimeFormatter.ofPattern("MMM d, yyyy, h:mm:ss a", Locale.ENGLISH);
 
-                    if (estado.equals(ESTADO)) {
-                        Color color = new Color(255, 255, 208);
-                        consultarReu.getTable().setBackground(color);
-                    }
+                LocalDateTime fecha = null;
 
-                    if (fila != -1) {
+                try {
+                	fecha = LocalDateTime.parse(fechaStr, formatoSQL);
+                	} catch (Exception e1) {
+                		try {
+                			fecha = LocalDateTime.parse(fechaStr, formatoIngles);
+                			} catch (Exception e2) {
+                				e2.printStackTrace();
+                				}
+                		}
 
-                        String dia = fecha.getDayOfWeek().getDisplayName(TextStyle.FULL, localeES).toLowerCase();
 
-                        int col = switch (dia) {
-                            case "lunes" -> 1;
-                            case "martes" -> 2;
-                            case "miércoles", "miercoles" -> 3;
-                            case "jueves" -> 4;
-                            case "viernes" -> 5;
-                            default -> -1;
-                        };
+                int hora = fecha.getHour();
+                int fila = convertirHoraAFila(hora);
+                if (fila == -1) continue;
 
-                        if (col != -1) {
-                            String clave = "Reunion" + idReu;
-                            String alumno = h.get("alumno").toString();
+                // -----------------------------
+                // 3. DÍA DE LA SEMANA
+                // -----------------------------
+                Locale localeES = Locale.forLanguageTag("es-ES");
+                String dia = fecha.getDayOfWeek().getDisplayName(TextStyle.FULL, localeES).toLowerCase();
 
-                            estadosReuniones.put(clave, estado.toLowerCase());
-                            consultarReu.getModelo().setValueAt("Reunión " + idReu + " con " + alumno, fila, col);
-                        }
+                int col = switch (dia) {
+                    case "lunes" -> 1;
+                    case "martes" -> 2;
+                    case "miércoles", "miercoles" -> 3;
+                    case "jueves" -> 4;
+                    case "viernes" -> 5;
+                    default -> -1;
+                };
+                if (col == -1) continue;
 
-                    }
-                }
+                // -----------------------------
+                // 4. ESTADO
+                // -----------------------------
+                String estado = h.get(ESTADO).toString();
+
+                // -----------------------------
+                // 5. ALUMNO 
+                // -----------------------------
+                Map<String, Object> alumnoObj =
+                	    gson.fromJson(gson.toJson(h.get(USERSBYALUMNOID)),
+                	                  new TypeToken<Map<String, Object>>(){}.getType());
+
+                String alumno = alumnoObj != null && alumnoObj.get(NOMBRE) != null
+                        ? alumnoObj.get("nombre").toString()
+                        : "Alumno";
+
+                // -----------------------------
+                // 6. GUARDAR ESTADO PARA COLORES
+                // -----------------------------
+                String clave = "Reunion" + idReu;
+                estadosReuniones.put(clave, estado.toLowerCase());
+
+                // -----------------------------
+                // 7. PINTAR EN LA TABLA
+                // -----------------------------
+                consultarReu.getModelo().setValueAt(
+                        "Reunión " + idReu + " con " + alumno,
+                        fila,
+                        col
+                );
             }
+
             lista.clear();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
 
     private int convertirHoraAFila(int horaReal) {
         return switch (horaReal) {
@@ -546,39 +600,64 @@ public class Controlador {
 
     public void cargarPendientes() {
         try {
-            oos.writeObject("4");
-            oos.flush();
-            String json = readJson();
+            dos.writeUTF("4");
+            dos.flush();
 
+            String json = readJson();
             Gson gson = new Gson();
+
             ArrayList<Map<String, Object>> lista =
                     gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
 
             for (Map<String, Object> h : lista) {
-                String estado = h.get(ESTADO).toString();
 
-                if (estado.equals("pendiente") || estado.equals("conflicto")) {
+                String estado = h.get(ESTADO).toString();
+                if (estado.equals(PENDIENTE) || estado.equals(CONFLICTO)) {
+
+                    // ID
+                    Object id = h.get(IDREUNION);
+
+                    // PROFESOR
+                    Map<String, Object> profObj =
+                            gson.fromJson(gson.toJson(h.get(USERSBYPROFESORID)),
+                                    new TypeToken<Map<String, Object>>(){}.getType());
+                    String profesor = profObj.get("nombre").toString();
+
+                    // ALUMNO
+                    Map<String, Object> alumObj =
+                            gson.fromJson(gson.toJson(h.get(USERSBYALUMNOID)),
+                                    new TypeToken<Map<String, Object>>(){}.getType());
+                    String alumno = alumObj.get("nombre").toString();
+
+                    // CENTRO
+                    String centro = h.get(IDCENTRO).toString();
+
+                    // Añadir fila directamente
                     pendientes.getModelo().addRow(new Object[]{
-                            h.get(ID),
-                            h.get(PROFESOR),
-                            h.get(ALUMNO),
-                            h.get(CENTRO),
-                            h.get(TITULO),
-                            h.get(ASUNTO),
-                            h.get(AULA)
+                            id,
+                            profesor,
+                            alumno,
+                            centro,
+                            h.get("titulo"),
+                            h.get("asunto"),
+                            h.get("aula")
                     });
                 }
-            }
+                }
+
+
             lista.clear();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
+
 
     public void cambiarEstadoReunion(int idReu, String nuevoEstado) {
         try {
-            oos.writeObject("6");
+            dos.writeUTF("6");
+            dos.flush();
             oos.writeObject(String.valueOf(idReu));
             oos.writeObject(nuevoEstado);
             oos.flush();
@@ -597,8 +676,8 @@ public class Controlador {
             centros.clear();
             crearReuniones.getComboUbicacion().removeAllItems();
 
-            oos.writeObject("7");
-            oos.flush();
+            dos.writeUTF("7");
+            dos.flush();
 
             String json = readJson();
             Gson gson = new Gson();
@@ -622,8 +701,8 @@ public class Controlador {
             usuarios.clear();
             crearReuniones.getComboMiembros().removeAllItems();
 
-            oos.writeObject("8");
-            oos.flush();
+            dos.writeUTF("8");
+            dos.flush();
 
             String json = readJson();
             Gson gson = new Gson();
@@ -644,8 +723,8 @@ public class Controlador {
 
     public String consultarEstado(String fechaStr) {
         try {
-            oos.writeObject("4");
-            oos.flush();
+            dos.writeUTF("4");
+            dos.flush();
 
             String json = readJson();
             Gson gson = new Gson();
@@ -743,8 +822,8 @@ public class Controlador {
             listaEnviar.add(mapa);
 
             try {
-                oos.writeObject("9");
-                oos.flush();
+                dos.writeUTF("9");
+                dos.flush();
                 Gson gson = new Gson();
                 oos.writeObject(gson.toJson(listaEnviar));
                 oos.flush();
@@ -768,8 +847,8 @@ public class Controlador {
 
     public void cerrarConexion() {
         try {
-            oos.writeObject("0");
-            oos.flush();
+            dos.writeUTF("0");
+            dos.flush();
             cliente.close();
             ois.close();
             oos.close();

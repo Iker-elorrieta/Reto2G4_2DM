@@ -20,7 +20,7 @@ public class Modulos implements java.io.Serializable {
 	private int horas;
 	private byte curso;
 	@JsonIgnore
-	private Set<Horarios> horarioses = new HashSet<Horarios>(0);
+	private transient Set<Horarios> horarioses = new HashSet<Horarios>(0);
 
 	public Modulos() {
 	}

@@ -1,17 +1,28 @@
 package Controlador;
 
 import java.util.ArrayList;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.example.ElorServ.Centro;
 import com.example.ElorServ.LeerJson;
 
 import modelo.*;
 
+@Component
 public class Controlador {
 
-	LeerJson leerJson = new LeerJson();
-	Consultas gestor = new Consultas();
-	
+
+    private final Consultas gestor;
+    private final LeerJson leerJson;
+
+    @Autowired
+    public Controlador(Consultas gestor, LeerJson leerJson) {
+        this.gestor = gestor;
+        this.leerJson = leerJson;
+    }
 	public ArrayList<Users> obtenerProfesores() {
 		 return gestor.obtenerProfesores();
 	}
@@ -25,7 +36,7 @@ public class Controlador {
 		return gestor.obtenerTodosAlumnos();
 	}
 	
-	public ArrayList<Horarios> obtenerHorarioProfe(Users profe) {
+	public ArrayList<Map<String, Object>> obtenerHorarioProfe(Users profe) {
 		return gestor.obtenerHorarioProfe(profe);
 	}
 	

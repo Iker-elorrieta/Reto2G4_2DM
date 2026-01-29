@@ -1,6 +1,8 @@
 package Vista;
 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,12 +14,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+
 import com.example.ElorServ.Centro;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import Controlador.Controlador;
-import modelo.Horarios;
 import modelo.Reuniones;
 import modelo.Users;
 
@@ -30,12 +32,16 @@ public class HiloServidor extends Thread {
     private static final Object ALUMNO = "idAlumno";
     private static final Object FECHA = "fecha";
     private static final String ESTADO = "estado";
+    
+    private  Controlador controlador;
     private Socket cliente;
     ArrayList<Users> listaUsuarios = new ArrayList<Users>();
     ArrayList<Users> listaAlumnos = new ArrayList<Users>();
     ArrayList<Reuniones> listaReunionesProfe = new ArrayList<Reuniones>();
     ArrayList<Reuniones> listaCentros = new ArrayList<Reuniones>();
     ArrayList<Users> listaTodosAlumnos = new ArrayList<Users>();
+    ArrayList<Map<String, Object>> listaHorarioProfe = new ArrayList<Map<String, Object>>();
+    
 
     public HiloServidor(Socket cliente, String userEmail, String userContraseña) {
         this.cliente = cliente;
@@ -45,13 +51,20 @@ public class HiloServidor extends Thread {
         this.cliente = cliente;
     }
 
+    public HiloServidor(Socket cliente, Controlador controlador) {
+        this.cliente = cliente;
+        this.controlador = controlador;
+    }
+
     public HiloServidor() {}
+    
+
+   
 
     @Override
     public void run() {
 
         String idProfe = null;
-        Controlador controlador = new Controlador();
         listaUsuarios = controlador.obtenerProfesores();
         Users usuario = new Users();
         
@@ -59,6 +72,8 @@ public class HiloServidor extends Thread {
 
             ObjectInputStream ois = new ObjectInputStream(cliente.getInputStream());
             ObjectOutputStream oos = new ObjectOutputStream(cliente.getOutputStream());
+            DataOutputStream dos = new DataOutputStream(cliente.getOutputStream());
+            DataInputStream dis = new DataInputStream(cliente.getInputStream());
 
 
             boolean correcto = false;
@@ -84,7 +99,7 @@ public class HiloServidor extends Thread {
 
                 if (correcto) {
                     oos.writeObject(idProfe);
-                    menu(idProfe, usuario, ois, oos, controlador, listaUsuarios);
+                    menu(idProfe, usuario, dos, dis, ois, oos, controlador, listaUsuarios);
 
                 } else {
                     oos.writeObject("-1");
@@ -97,7 +112,7 @@ public class HiloServidor extends Thread {
         }
     }
 
-    private void menu(String idProfe, Users usuario, ObjectInputStream ois,  ObjectOutputStream oos, Controlador controlador, ArrayList<Users> listaUsuarios) {
+    private void menu(String idProfe, Users usuario, DataOutputStream dos, DataInputStream dis, ObjectInputStream ois,  ObjectOutputStream oos, Controlador controlador, ArrayList<Users> listaUsuarios) {
 
         if (idProfe != null) {
             listaAlumnos = controlador.obtenerAlumnos(usuario);
@@ -109,7 +124,7 @@ public class HiloServidor extends Thread {
 
             do {
 
-                String opcion = ois.readObject().toString();
+                String opcion = dis.readUTF();
                 opcionInt = Integer.parseInt(opcion);
 
                 switch (opcionInt) {
@@ -131,70 +146,27 @@ public class HiloServidor extends Thread {
                     }
 
                     case 3: {
-                        ArrayList<Horarios> listaHorarioProfe =
-                                controlador.obtenerHorarioProfe(usuario);
-
-                        ArrayList<Map<String, Object>> listaEnviar = new ArrayList<>();
-
-                        for (Horarios h : listaHorarioProfe) {
-                            Map<String, Object> mapa = new java.util.HashMap<>();
-                            mapa.put("hora", h.getHora());
-                            mapa.put("dia", h.getDia());
-                            mapa.put("aula", h.getAula());
-                            mapa.put("modulos",
-                                    (h.getModulos() != null) ? h.getModulos().getNombre() : "");
-                            listaEnviar.add(mapa);
-                        }
-
-                        sendJson(oos, listaEnviar);
+                        listaHorarioProfe = controlador.obtenerHorarioProfe(usuario);
+                        sendJson(oos,listaHorarioProfe);
                         break;
                     }
+
 
                     case 4: {
-                        listaReunionesProfe =
-                                controlador.obtenerReunionesPorProfesor(idProfe);
-
-                        ArrayList<Map<String, Object>> listaEnviar = new ArrayList<>();
-
-                        for (Reuniones r : listaReunionesProfe) {
-                            Map<String, Object> mapa = new java.util.HashMap<>();
-                            mapa.put("id", r.getIdReunion());
-                            mapa.put("estado", r.getEstado());
-                            mapa.put("profesor", r.getUsersByProfesorId().getNombre());
-                            mapa.put("alumno", r.getUsersByAlumnoId().getNombre());
-                            mapa.put("titulo", r.getTitulo());
-                            mapa.put("asunto", r.getAsunto());
-                            mapa.put("aula", r.getAula());
-                            mapa.put("fecha", r.getFecha().toString());
-                            mapa.put("centro",
-                                    controlador.obtenerNombreCentroPorId(r.getIdCentro()));
-                            listaEnviar.add(mapa);
-                        }
-
-                        sendJson(oos, listaEnviar);
+                    	listaReunionesProfe = controlador.obtenerReunionesPorProfesor(idProfe);
+                        sendJson(oos, listaReunionesProfe);
                         break;
                     }
+
 
                     case 5: {
 
                         Users otroProfe = (Users) ois.readObject();
 
-                        ArrayList<Horarios> listaHorarioOtro =
+                        ArrayList<Map<String, Object>> listaHorarioOtro =
                                 controlador.obtenerHorarioProfe(otroProfe);
 
-                        ArrayList<Map<String, Object>> listaEnviar = new ArrayList<>();
-
-                        for (Horarios h : listaHorarioOtro) {
-                            Map<String, Object> mapa = new java.util.HashMap<>();
-                            mapa.put("hora", h.getHora());
-                            mapa.put("dia", h.getDia());
-                            mapa.put("aula", h.getAula());
-                            mapa.put("modulos",
-                                    (h.getModulos() != null) ? h.getModulos().getNombre() : "");
-                            listaEnviar.add(mapa);
-                        }
-
-                        sendJson(oos, listaEnviar);
+                        sendJson(oos, listaHorarioOtro);
                         break;
                     }
 
@@ -286,6 +258,7 @@ public class HiloServidor extends Thread {
         oos.write(data);
         oos.flush();
     }
+    
 
     public static String cifrarUsuario(String texto) {
         try {
