@@ -11,7 +11,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 
@@ -20,6 +19,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import Controlador.Controlador;
+import modelo.Horarios;
+
 import modelo.Reuniones;
 import modelo.Users;
 
@@ -40,7 +41,7 @@ public class HiloServidor extends Thread {
     ArrayList<Reuniones> listaReunionesProfe = new ArrayList<Reuniones>();
     ArrayList<Reuniones> listaCentros = new ArrayList<Reuniones>();
     ArrayList<Users> listaTodosAlumnos = new ArrayList<Users>();
-    ArrayList<Map<String, Object>> listaHorarioProfe = new ArrayList<Map<String, Object>>();
+    ArrayList<Horarios> listaHorarioProfe = new ArrayList<Horarios>();
     
 
     public HiloServidor(Socket cliente, String userEmail, String userContraseña) {
@@ -146,7 +147,7 @@ public class HiloServidor extends Thread {
                     }
 
                     case 3: {
-                        listaHorarioProfe = controlador.obtenerHorarioProfe(usuario);
+                        listaHorarioProfe = controlador.obtenerHorarioProfe(idProfe);
                         sendJson(oos,listaHorarioProfe);
                         break;
                     }
@@ -163,8 +164,8 @@ public class HiloServidor extends Thread {
 
                         Users otroProfe = (Users) ois.readObject();
 
-                        ArrayList<Map<String, Object>> listaHorarioOtro =
-                                controlador.obtenerHorarioProfe(otroProfe);
+                        ArrayList<Horarios> listaHorarioOtro =
+                                controlador.obtenerHorarioProfe(otroProfe.getId().toString());
 
                         sendJson(oos, listaHorarioOtro);
                         break;
@@ -173,6 +174,7 @@ public class HiloServidor extends Thread {
                     case 6: {
                         int id = Integer.parseInt(ois.readObject().toString());
                         String estado = ois.readObject().toString();
+                                                
                         for (Reuniones r : listaReunionesProfe) {
                             if (id == r.getIdReunion()) {
                                 r.setEstado(estado);
@@ -184,20 +186,9 @@ public class HiloServidor extends Thread {
 
                     case 7: {
                         ArrayList<Centro> centros = controlador.leerJson();
-                        ArrayList<Map<String, Object>> centrosUnicos = new ArrayList<>();
 
-                        for (Centro c : centros) {
-                            if (c.getNOM() != null) {
-                                Map<String, Object> datos = new HashMap<>();
-                                datos.put("NOM", c.getNOM());
-                                datos.put("CCEN", c.getCCEN());
-                                centrosUnicos.add(datos);
-                            }
-                        }
-
-                        sendJson(oos, centrosUnicos);
+                        sendJson(oos, centros);
                         centros.clear();
-                        centrosUnicos.clear();
                         break;
                     }
 

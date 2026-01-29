@@ -25,8 +25,7 @@ import javax.swing.table.DefaultTableModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import modelo.Centro;
-import modelo.Users;
+import modelo.*;
 
 public class Controlador {
 
@@ -41,12 +40,8 @@ public class Controlador {
     private static final String DNI = "dni";
     private static final String DIRECCION = "direccion";
     private static final String TELEFONO = "telefono1";
-    private static final String HORA = "hora";
-    private static final String DIA = "dia";
-    private static final String MODULOS = "modulos";
     private static final String ESTADO = "estado";
     private static final String FECHA = "fecha";
-    private static final String AULA = "aula";
 	private static final Object IDREUNION = "idReunion";
 	private static final Object USERSBYALUMNOID = "usersByAlumnoId";
 	private static final Object IDCENTRO = "idCentro";
@@ -222,14 +217,15 @@ public class Controlador {
             String json = readJson();
 
             Gson gson = new Gson();
-            ArrayList<Map<String, Object>> lista =
-                    gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
+            ArrayList<Horarios> lista =
+                    gson.fromJson(json, new TypeToken<ArrayList<Horarios>>() {}.getType());
 
-            for (Map<String, Object> h : lista) {
+            for (Horarios h : lista) {         	
 
-                int fila = ((Double) h.get(HORA)).intValue() - 1;
+                int fila = h.getHora() -1;
+                
 
-                int col = switch (h.get(DIA).toString().toLowerCase()) {
+                int col = switch (h.getDia().toString().toLowerCase()) {
                     case "lunes" -> 1;
                     case "martes" -> 2;
                     case "miercoles" -> 3;
@@ -237,13 +233,13 @@ public class Controlador {
                     case "viernes" -> 5;
                     default -> -1;
                 };
-                
-                if(h.get(AULA) != null) {
-                	informacion = "<html>" + h.get(MODULOS) + "<br>" + h.get(AULA) + "</html>";
+                if(h.getAula() != null) {
+                	informacion = "<html>" + h.getModulos().getNombre() + "<br>" + h.getAula() + "</html>";
                 } else {
-                	informacion = "<html>" + h.get(MODULOS) + "<br>Sin aula asignada</html>";
+                	informacion = "<html>" +  h.getModulos().getNombre() + "<br>Sin aula asignada</html>";
                 }
-
+                
+                
                 if (col != -1) {
                     miHorario.getModelo().setValueAt(informacion, fila, col);
                 }
@@ -328,8 +324,8 @@ public class Controlador {
             String json = readJson();
             
             Gson gson = new Gson();
-            ArrayList<Map<String, Object>> lista =
-                    gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
+            ArrayList<Horarios> lista =
+                    gson.fromJson(json, new TypeToken<ArrayList<Horarios>>() {}.getType());
 
             // limpiar tabla
             for (int i = 0; i < 6; i++) {
@@ -338,11 +334,12 @@ public class Controlador {
                 }
             }
 
-            for (Map<String, Object> h : lista) {
+            for (Horarios h : lista) {         	
 
-                int fila = ((Double) h.get(HORA)).intValue() - 1;
+                int fila = h.getHora() -1;
+                
 
-                int col = switch (h.get(DIA).toString().toLowerCase()) {
+                int col = switch (h.getDia().toString().toLowerCase()) {
                     case "lunes" -> 1;
                     case "martes" -> 2;
                     case "miercoles" -> 3;
@@ -350,13 +347,13 @@ public class Controlador {
                     case "viernes" -> 5;
                     default -> -1;
                 };
-
-                if(h.get(AULA) != null) {
-                	informacion = "<html>" + h.get(MODULOS) + "<br>" + h.get(AULA) + "</html>";
+                if(h.getAula() != null) {
+                	informacion = "<html>" + h.getModulos().getNombre() + "<br>" + h.getAula() + "</html>";
                 } else {
-                	informacion = "<html>" + h.get(MODULOS) + "<br>Sin aula asignada</html>";
+                	informacion = "<html>" +  h.getModulos().getNombre() + "<br>Sin aula asignada</html>";
                 }
-
+                
+                
                 if (col != -1) {
                     otrosHorarios.getModelo().setValueAt(informacion, fila, col);
                 }
@@ -449,14 +446,15 @@ public class Controlador {
             String informacion; 
             
             Gson gson = new Gson();
-            ArrayList<Map<String, Object>> lista =
-                    gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
+            ArrayList<Horarios> lista =
+                    gson.fromJson(json, new TypeToken<ArrayList<Horarios>>() {}.getType());
 
-            for (Map<String, Object> h : lista) {
+            for (Horarios h : lista) {         	
 
-                int fila = ((Double) h.get(HORA)).intValue() - 1;
+                int fila = h.getHora() -1;
+                
 
-                int col = switch (h.get(DIA).toString().toLowerCase()) {
+                int col = switch (h.getDia().toString().toLowerCase()) {
                     case "lunes" -> 1;
                     case "martes" -> 2;
                     case "miercoles" -> 3;
@@ -464,13 +462,13 @@ public class Controlador {
                     case "viernes" -> 5;
                     default -> -1;
                 };
-                
-                if(h.get(AULA) != null) {
-                	informacion = "<html>" + h.get(MODULOS) + "<br>" + h.get(AULA) + "</html>";
+                if(h.getAula() != null) {
+                	informacion = "<html>" + h.getModulos().getNombre() + "<br>" + h.getAula() + "</html>";
                 } else {
-                	informacion = "<html>" + h.get(MODULOS) + "<br>Sin aula asignada</html>";
+                	informacion = "<html>" +  h.getModulos().getNombre() + "<br>Sin aula asignada</html>";
                 }
-
+                
+                
                 if (col != -1) {
                     consultarReu.getModelo().setValueAt(informacion, fila, col);
                 }

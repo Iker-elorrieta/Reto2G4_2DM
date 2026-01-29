@@ -1,7 +1,7 @@
 package Controlador;
 
 import java.util.ArrayList;
-import java.util.Map;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,8 +36,8 @@ public class Controlador {
 		return gestor.obtenerTodosAlumnos();
 	}
 	
-	public ArrayList<Map<String, Object>> obtenerHorarioProfe(Users profe) {
-		return gestor.obtenerHorarioProfe(profe);
+	public ArrayList<Horarios> obtenerHorarioProfe(String idProfe) {
+		return gestor.obtenerHorarioProfe(idProfe);
 	}
 	
 	public ArrayList<Reuniones> obtenerReunionesPorProfesor(String idProfe) {

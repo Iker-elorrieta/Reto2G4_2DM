@@ -74,7 +74,6 @@ public class MiHorario extends JFrame {
         // CARGAR DATOS DESDE EL CONTROLADOR
         controlador.cargarHorario(idProfe);
         
-        controlador.cargarHorario(idProfe);
         ajustarAlturaFilas();
         ajustarAnchoColumnas();
         

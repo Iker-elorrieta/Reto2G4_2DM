@@ -48,6 +48,7 @@ public class Horarios implements java.io.Serializable {
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
+	
 
 	public Integer getId() {
 		return this.id;
