@@ -12,12 +12,8 @@ import Controlador.Controlador;
 @Component
 public class Servidor extends Thread {
 
-    private final Controlador controlador;
-
     @Autowired
-    public Servidor(Controlador controlador) {
-        this.controlador = controlador;
-    }
+    private  Controlador controlador;
 
     @Override
     public void run() {

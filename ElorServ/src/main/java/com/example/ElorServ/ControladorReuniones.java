@@ -2,6 +2,7 @@ package com.example.ElorServ;
 
 import java.util.ArrayList;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.PostConstruct;
 
@@ -13,17 +14,15 @@ import modelo.*;
 @RequestMapping("/reuniones")
 public class ControladorReuniones {
 
-    private final Consultas consultas;
+	@Autowired
+    private Consultas consultas;
 
     private ArrayList<Reuniones> reuniones;
     private int siguienteId;
     
-    private final HibernateUtil hibernateUtil;
+    @Autowired
+    private HibernateUtil hibernateUtil;
 
-    public ControladorReuniones(HibernateUtil hibernateUtil, Consultas consultas) {
-        this.hibernateUtil = hibernateUtil;
-        this.consultas = consultas;
-    }
 
     @PostConstruct
     public void init() {

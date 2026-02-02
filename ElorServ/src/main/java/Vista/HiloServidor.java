@@ -2,6 +2,7 @@ package Vista;
 
 
 import java.io.DataInputStream;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -11,7 +12,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Map;
 
 
 import com.example.ElorServ.Centro;
@@ -26,13 +26,6 @@ import modelo.Users;
 
 public class HiloServidor extends Thread {
 
-    private static final Object TITULO = "titulo";
-    private static final Object ASUNTO = "asunto";
-    private static final Object AULA = "aula";
-    private static final Object IDCENTRO = "idCentro";
-    private static final Object ALUMNO = "idAlumno";
-    private static final Object FECHA = "fecha";
-    private static final String ESTADO = "estado";
     
     private  Controlador controlador;
     private Socket cliente;
@@ -204,25 +197,25 @@ public class HiloServidor extends Thread {
 
                         Gson gson = new Gson();
 
-                        ArrayList<Map<String, Object>> lista =
-                                gson.fromJson(json, new TypeToken<ArrayList<Map<String, Object>>>() {}.getType());
+                        ArrayList<Reuniones> lista =
+                                gson.fromJson(json, new TypeToken<ArrayList<Reuniones>>() {}.getType());
 
                         Reuniones reunion = new Reuniones();
                         Users alumno = new Users();
                         Users profesor = new Users();
-                        for (Map<String, Object> a : lista) {
-                            reunion.setTitulo(a.get(TITULO).toString());
-                            reunion.setAsunto(a.get(ASUNTO).toString());
-                            reunion.setAula(a.get(AULA).toString());
-                            int idAlumno = ((Double) a.get(ALUMNO)).intValue();
+                        for (Reuniones a : lista) {
+                            reunion.setTitulo(a.getTitulo().toString());
+                            reunion.setAsunto(a.getAsunto().toString());
+                            reunion.setAula(a.getAula().toString());
+                            int idAlumno = (a.getUsersByAlumnoId().getId());
                             alumno.setId(idAlumno);
                             reunion.setUsersByAlumnoId(alumno);
                             profesor.setId(Integer.parseInt(idProfe));
                             reunion.setUsersByProfesorId(profesor);
-                            int idCentro = ((Double) a.get(IDCENTRO)).intValue();
+                            int idCentro = (Integer.parseInt(a.getIdCentro()));
                             reunion.setIdCentro(String.valueOf(idCentro));
-                            reunion.setEstado(a.get(ESTADO).toString());
-                            String fecha = a.get(FECHA).toString();
+                            reunion.setEstado(a.getEstado().toString());
+                            String fecha = a.getFecha().toString();
                             Timestamp fechats = Timestamp.valueOf(fecha);
                             reunion.setFecha(fechats);
                         }

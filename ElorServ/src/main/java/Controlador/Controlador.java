@@ -14,15 +14,13 @@ import modelo.*;
 @Component
 public class Controlador {
 
+	@Autowired
+    private  Consultas gestor;
+	@Autowired
+    private  LeerJson leerJson;
 
-    private final Consultas gestor;
-    private final LeerJson leerJson;
-
-    @Autowired
-    public Controlador(Consultas gestor, LeerJson leerJson) {
-        this.gestor = gestor;
-        this.leerJson = leerJson;
-    }
+    
+   
 	public ArrayList<Users> obtenerProfesores() {
 		 return gestor.obtenerProfesores();
 	}

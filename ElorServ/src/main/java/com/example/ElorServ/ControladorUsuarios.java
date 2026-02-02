@@ -2,6 +2,7 @@ package com.example.ElorServ;
 
 import java.util.ArrayList;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import Controlador.Consultas;
@@ -15,16 +16,14 @@ import modelo.Users;
 public class ControladorUsuarios {
 	
 
+	@Autowired
 	private Consultas consultas; 
 	private ArrayList<Users> usuarios;
 	private int siguienteId = 17; 
 	
-	private final HibernateUtil hibernateUtil;
+	@Autowired
+	private HibernateUtil hibernateUtil;
 
-	public ControladorUsuarios(HibernateUtil hibernateUtil, Consultas consultas) {
-		this.hibernateUtil = hibernateUtil;
-		this.consultas = consultas;
-	}
 	
 
     @PostConstruct
