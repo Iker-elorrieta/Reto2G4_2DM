@@ -89,7 +89,7 @@ public class GestionPendientes extends JFrame {
                 if (fila == -1) return;
 
                 // Guardar ID
-                idSeleccionado = ((Double) table.getValueAt(fila, 0)).intValue();
+                idSeleccionado = ((Integer) table.getValueAt(fila, 0));
 
                 // Guardar toda la fila en un array
                 datosFilaSeleccionada = new Object[table.getColumnCount()];

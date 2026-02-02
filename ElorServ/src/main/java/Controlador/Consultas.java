@@ -21,13 +21,10 @@ public class Consultas {
 	public static final String PROFESOR = "'profesor'";
 	public static final String ALUMNO = "'alumno'";
 
-    private final HibernateUtil hibernateUtil;
+	@Autowired
+    private  HibernateUtil hibernateUtil;
 
     
-	@Autowired
-    public Consultas(HibernateUtil hibernateUtil) {
-        this.hibernateUtil = hibernateUtil;
-    }
 	
 	// ===================== USUARIOS =====================
 

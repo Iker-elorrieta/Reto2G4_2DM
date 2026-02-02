@@ -14,14 +14,12 @@ import modelo.*;
 @RestController
 public class ControladorHorarios {
 
-    private final Consultas consultas;
-    private final HibernateUtil hibernateUtil;
+	@Autowired
+    private Consultas consultas;
+	@Autowired
+    private HibernateUtil hibernateUtil;
 
-    @Autowired
-    public ControladorHorarios(HibernateUtil hibernateUtil, Consultas consultas) {
-        this.hibernateUtil = hibernateUtil;
-        this.consultas = consultas;
-    }
+    
 
     @GetMapping("/horarios/profesores")
     public ArrayList<Horarios> getProfesores() {
