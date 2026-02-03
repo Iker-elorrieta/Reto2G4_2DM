@@ -11,7 +11,7 @@ public class MiPerfil extends JFrame {
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
 
-    private JLabel lblEmail, lblUsername, lblNombre, lblApellidos, lblDNI, lblDireccion, lblTelefono;
+    private JLabel lblEmail, lblUsername, lblNombre, lblApellidos, lblDNI, lblDireccion, lblTelefono, lblFotoPerfil;;
 
 
     public MiPerfil(Controlador controlador, int idProfe) {
@@ -19,8 +19,8 @@ public class MiPerfil extends JFrame {
         controlador.setMiPerfil(this);
 
         setTitle("Mi Perfil");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 800, 534);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setBounds(100, 100, 380, 529);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
@@ -37,44 +37,61 @@ public class MiPerfil extends JFrame {
             dispose();
         });
         contentPane.add(btnVolver);
+        
+        lblFotoPerfil = new JLabel();
+        lblFotoPerfil.setBounds(133, 54, 100, 100); 
+        contentPane.add(lblFotoPerfil);
 
         lblEmail = new JLabel("Email:");
         lblEmail.setForeground(Color.WHITE);
-        lblEmail.setBounds(100, 150, 400, 20);
+        lblEmail.setBounds(79, 206, 275, 20);
         contentPane.add(lblEmail);
 
         lblUsername = new JLabel("Username:");
         lblUsername.setForeground(Color.WHITE);
-        lblUsername.setBounds(100, 180, 400, 20);
+        lblUsername.setBounds(79, 236, 275, 20);
         contentPane.add(lblUsername);
 
         lblNombre = new JLabel("Nombre:");
         lblNombre.setForeground(Color.WHITE);
-        lblNombre.setBounds(100, 210, 400, 20);
+        lblNombre.setBounds(79, 266, 275, 20);
         contentPane.add(lblNombre);
 
         lblApellidos = new JLabel("Apellidos:");
         lblApellidos.setForeground(Color.WHITE);
-        lblApellidos.setBounds(100, 240, 400, 20);
+        lblApellidos.setBounds(79, 296, 275, 20);
         contentPane.add(lblApellidos);
 
         lblDNI = new JLabel("DNI:");
         lblDNI.setForeground(Color.WHITE);
-        lblDNI.setBounds(100, 270, 400, 20);
+        lblDNI.setBounds(79, 326, 275, 20);
         contentPane.add(lblDNI);
 
         lblDireccion = new JLabel("Dirección:");
         lblDireccion.setForeground(Color.WHITE);
-        lblDireccion.setBounds(100, 300, 400, 20);
+        lblDireccion.setBounds(79, 356, 275, 20);
         contentPane.add(lblDireccion);
 
         lblTelefono = new JLabel("Teléfono:");
         lblTelefono.setForeground(Color.WHITE);
-        lblTelefono.setBounds(100, 330, 400, 20);
+        lblTelefono.setBounds(79, 386, 275, 20);
         contentPane.add(lblTelefono);
 
         controlador.cargarPerfil(idProfe);
 
+        JButton btnSalir = new JButton("");
+        btnSalir.setIcon(new ImageIcon("fotos/salir.png"));
+        btnSalir.setBounds(309, 11, 45, 45);
+        btnSalir.setContentAreaFilled(false);
+        btnSalir.setBorderPainted(false);
+        btnSalir.addActionListener(e -> {
+            Login login = new Login(new Controlador());
+            login.setVisible(true);
+			controlador.cerrarConexion();
+            dispose();
+        });
+        contentPane.add(btnSalir);
+        
         JLabel lblFondo = new JLabel("");
         lblFondo.setBounds(0, 0, 800, 534);
         lblFondo.setIcon(new ImageIcon("fotos/backgroundGRANDE.png"));
@@ -88,4 +105,6 @@ public class MiPerfil extends JFrame {
     public JLabel getLblDNI() { return lblDNI; }
     public JLabel getLblDireccion() { return lblDireccion; }
     public JLabel getLblTelefono() { return lblTelefono; }
+    public JLabel getLblFotoPerfil() { return lblFotoPerfil; }
+
 }

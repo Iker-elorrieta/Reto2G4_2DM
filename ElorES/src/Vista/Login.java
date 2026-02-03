@@ -56,7 +56,7 @@ public class Login extends JFrame {
         lblContraseña.setBounds(80, 293, 92, 14);
         contentPane.add(lblContraseña);
 
-        JButton btnAcceder = new JButton("Acceder");
+        Boton btnAcceder = new Boton("Acceder");
         btnAcceder.setBounds(319, 345, 89, 23);
         btnAcceder.addActionListener(e -> {
             int id = controlador.validarUsuario();

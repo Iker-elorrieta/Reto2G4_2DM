@@ -18,7 +18,7 @@ public class GestionReuniones extends JFrame {
 
         controlador.setGestionReuniones(this); 
         setTitle("Gestionar Reuniones");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setBounds(100, 100, 706, 485);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -51,7 +51,7 @@ public class GestionReuniones extends JFrame {
         contentPane.add(btnVolver);
 
         // BOTÓN CREAR REUNIONES
-        JButton btnCrear = new JButton("Crear Reuniones");
+        Boton btnCrear = new Boton("Crear Reuniones");
         btnCrear.setBounds(243, 190, 223, 40);
         btnCrear.setBackground(new Color(232, 220, 202));
         btnCrear.setForeground(Color.BLACK);
@@ -64,7 +64,7 @@ public class GestionReuniones extends JFrame {
         contentPane.add(btnCrear);
 
         // BOTÓN VER REUNIONES
-        JButton btnVer = new JButton("Ver Mis Reuniones");
+        Boton	 btnVer = new Boton("Ver Mis Reuniones");
         btnVer.setBounds(243, 272, 223, 40);
         btnVer.setBackground(new Color(232, 220, 202));
         btnVer.setForeground(Color.BLACK);
@@ -75,6 +75,19 @@ public class GestionReuniones extends JFrame {
             dispose();
         });
         contentPane.add(btnVer);
+        
+        JButton btnSalir = new JButton("");
+        btnSalir.setIcon(new ImageIcon("fotos/salir.png"));
+        btnSalir.setBounds(635, 11, 45, 45);
+        btnSalir.setContentAreaFilled(false);
+        btnSalir.setBorderPainted(false);
+        btnSalir.addActionListener(e -> {
+            Login login = new Login(new Controlador());
+            login.setVisible(true);
+			controlador.cerrarConexion();
+            dispose();
+        });
+        contentPane.add(btnSalir);
 
         // FONDO
         JLabel lblFondo = new JLabel("");
