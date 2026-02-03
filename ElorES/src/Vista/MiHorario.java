@@ -1,5 +1,6 @@
 package Vista;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
 import javax.swing.*;
@@ -23,7 +24,7 @@ public class MiHorario extends JFrame {
         controlador.setMiHorario(this);
 
         setTitle("Mi Horario");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setBounds(100, 100, 800, 534);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -64,7 +65,41 @@ public class MiHorario extends JFrame {
             modelo.setValueAt("Hora " + (i + 1), i, 0);
         }
 
-        table = new JTable(modelo);
+        table = new JTable(modelo) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+
+                // Colores
+                Color azulClaro = new Color(173, 216, 230); // light blue
+                Color crema = new Color(255, 253, 208);     // cream
+                Color azulEncabezado = new Color(70, 130, 180); // steel blue
+
+                // Encabezado
+                if (row == -1) {
+                    c.setBackground(azulEncabezado);
+                    c.setForeground(Color.WHITE);
+                } else {
+                    // Alternar colores por fila
+                    if (row % 2 == 0) {
+                        c.setBackground(azulClaro);
+                    } else {
+                        c.setBackground(crema);
+                    }
+                    c.setForeground(Color.BLACK);
+                }
+
+                // Selección (opcional)
+                if (isCellSelected(row, column)) {
+                    c.setBackground(new Color(100, 149, 237)); // cornflower blue
+                    c.setForeground(Color.WHITE);
+                }
+
+                return c;
+            }
+        };
         table.setEnabled(false);
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -77,6 +112,18 @@ public class MiHorario extends JFrame {
         ajustarAlturaFilas();
         ajustarAnchoColumnas();
         
+        JButton btnSalir = new JButton("");
+        btnSalir.setIcon(new ImageIcon("fotos/salir.png"));
+        btnSalir.setBounds(729, 11, 45, 45);
+        btnSalir.setContentAreaFilled(false);
+        btnSalir.setBorderPainted(false);
+        btnSalir.addActionListener(e -> {
+            Login login = new Login(new Controlador());
+            login.setVisible(true);
+			controlador.cerrarConexion();
+            dispose();
+        });
+        contentPane.add(btnSalir);
 
         // FONDO
         JLabel lblFondo = new JLabel("");

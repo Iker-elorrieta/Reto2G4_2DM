@@ -35,8 +35,8 @@ public class CrearReu extends JFrame {
 
         controlador.setCrearReu(this); 
 
-        setTitle("Crear Reuniones");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Crear Nueva Reunion");
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setBounds(100, 100, 800, 534);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -71,32 +71,32 @@ public class CrearReu extends JFrame {
         // CAMPOS Y LABELS
         JLabel lblNombre = new JLabel("Nombre Reunión:");
         lblNombre.setForeground(Color.WHITE);
-        lblNombre.setBounds(27, 202, 128, 14);
+        lblNombre.setBounds(27, 209, 128, 14);
         contentPane.add(lblNombre);
 
         txtNombre = new JTextField();
-        txtNombre.setBounds(129, 190, 208, 29);
+        txtNombre.setBounds(157, 202, 208, 29);
         contentPane.add(txtNombre);
 
         lblFechaYHora = new JLabel("Fecha:");
         lblFechaYHora.setForeground(Color.WHITE);
-        lblFechaYHora.setBounds(27, 259, 128, 14);
+        lblFechaYHora.setBounds(27, 272, 128, 14);
         contentPane.add(lblFechaYHora);
 
         dateChooser = new JDateChooser();
-        dateChooser.setBounds(129, 255, 208, 24);
+        dateChooser.setBounds(157, 262, 208, 24);
         contentPane.add(dateChooser);
 
         lblAula = new JLabel("Aula:");
         lblAula.setForeground(Color.WHITE);
-        lblAula.setBounds(451, 219, 128, 14);
+        lblAula.setBounds(448, 202, 128, 14);
         contentPane.add(lblAula);
 
         comboAula = new JComboBox<>();
         comboAula.setModel(new DefaultComboBoxModel<>(new String[]{
                 "", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
         }));
-        comboAula.setBounds(586, 211, 171, 30);
+        comboAula.setBounds(586, 194, 171, 30);
         contentPane.add(comboAula);
 
         lblTema = new JLabel("Tema:");
@@ -105,29 +105,29 @@ public class CrearReu extends JFrame {
         contentPane.add(lblTema);
 
         taTema = new JTextArea();
-        taTema.setBounds(129, 376, 207, 93);
+        taTema.setBounds(157, 383, 207, 93);
         contentPane.add(taTema);
 
         lblMiembros = new JLabel("Miembros:");
         lblMiembros.setForeground(Color.WHITE);
-        lblMiembros.setBounds(451, 286, 128, 14);
+        lblMiembros.setBounds(448, 259, 128, 14);
         contentPane.add(lblMiembros);
 
         comboMiembros = new JComboBox<>();
-        comboMiembros.setBounds(586, 278, 171, 30);
+        comboMiembros.setBounds(586, 251, 171, 30);
         contentPane.add(comboMiembros);
 
         lblUbicacion = new JLabel("Ubicación:");
         lblUbicacion.setForeground(Color.WHITE);
-        lblUbicacion.setBounds(451, 345, 128, 14);
+        lblUbicacion.setBounds(448, 317, 128, 14);
         contentPane.add(lblUbicacion);
 
         comboUbicacion = new JComboBox<>();
-        comboUbicacion.setBounds(586, 337, 174, 30);
+        comboUbicacion.setBounds(586, 309, 171, 30);
         contentPane.add(comboUbicacion);
         
-        JButton btnAñadir = new JButton("Añadir");
-        btnAñadir.setBounds(451, 411, 89, 23);
+        Boton btnAñadir = new Boton("Añadir");
+        btnAñadir.setBounds(487, 421, 89, 23);
         contentPane.add(btnAñadir);
         
         
@@ -137,7 +137,7 @@ public class CrearReu extends JFrame {
         contentPane.add(lblHora);
         
         spinnerHora = new JSpinner(new SpinnerDateModel());
-        spinnerHora.setBounds(129, 314, 208, 20);
+        spinnerHora.setBounds(157, 321, 208, 20);
         JSpinner.DateEditor editor = new JSpinner.DateEditor(spinnerHora, "HH:mm:ss");
         spinnerHora.setEditor(editor);
         contentPane.add(spinnerHora);        
@@ -146,6 +146,19 @@ public class CrearReu extends JFrame {
         lblError.setForeground(new Color(255, 0, 0));
         lblError.setBounds(451, 455, 306, 14);
         contentPane.add(lblError);
+        
+        JButton btnSalir = new JButton("");
+        btnSalir.setIcon(new ImageIcon("fotos/salir.png"));
+        btnSalir.setBounds(729, 11, 45, 45);
+        btnSalir.setContentAreaFilled(false);
+        btnSalir.setBorderPainted(false);
+        btnSalir.addActionListener(e -> {
+            Login login = new Login(new Controlador());
+            login.setVisible(true);
+			controlador.cerrarConexion();
+            dispose();
+        });
+        contentPane.add(btnSalir);
 
         // FONDO
         lblFondo = new JLabel("");

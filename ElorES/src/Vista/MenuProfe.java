@@ -18,7 +18,7 @@ public class MenuProfe extends JFrame {
         controlador.setMenuProfe(this);
 
         setTitle("Mi Área de Trabajo");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setBounds(100, 100, 706, 485);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -36,7 +36,7 @@ public class MenuProfe extends JFrame {
         lblLogo.setIcon(new ImageIcon(imagen));
         contentPane.add(lblLogo);
 
-        JButton btn1 = new JButton("Consultar mis alumnos");
+        Boton btn1 = new Boton("Consultar mis alumnos");
         btn1.setBounds(62, 194, 223, 40);
         btn1.addActionListener(e -> {
             ConsultarAlumnos ventana = new ConsultarAlumnos(controlador, idProfe);
@@ -45,7 +45,7 @@ public class MenuProfe extends JFrame {
         });
         contentPane.add(btn1);
 
-        JButton btn2 = new JButton("Consultar mi horario");
+        Boton btn2 = new Boton("Consultar mi horario");
         btn2.setBounds(62, 277, 223, 40);
         btn2.addActionListener(e -> {
             MiHorario ventana = new MiHorario(controlador, idProfe);
@@ -54,7 +54,7 @@ public class MenuProfe extends JFrame {
         });
         contentPane.add(btn2);
 
-        JButton btn3 = new JButton("Gestionar Reuniones");
+        Boton btn3 = new Boton("Gestionar Reuniones");
         btn3.setBounds(383, 194, 223, 40);
         btn3.addActionListener(e -> {
             GestionReuniones ventana = new GestionReuniones(controlador, idProfe);
@@ -63,7 +63,7 @@ public class MenuProfe extends JFrame {
         });
         contentPane.add(btn3);
 
-        JButton btn4 = new JButton("Consultar otros horarios");
+        Boton btn4 = new Boton("Consultar otros horarios");
         btn4.setBounds(383, 277, 223, 40);
         btn4.addActionListener(e -> {
             OtrosHorarios ventana = new OtrosHorarios(controlador, idProfe);
